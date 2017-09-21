@@ -1,0 +1,29 @@
+<%!
+import cgi
+%>
+<%  
+	player_config_attrs = ''
+%>	
+
+<% 
+for item in list({player_config}.items()):
+    player_config_attrs += 'data-{{}}="{{}}" '.format(item[0], cgi.escape(item[1], quote=True))
+%>
+
+<div class="scormxblock_block">
+    <h3 class="scorm_name">{self.display_name} (External Resource) <span class="scorm_weight">{self.weight} points possible</span></h3>
+    <div class="scorm_description">{self.description}
+        <div class="scorm_launch"><button id="scorm-launch-{self.url_name}">Launch module</button></div>
+    </div>
+
+</div>
+
+<iframe class="scormxblock_hostframe" id="scormxblock-{self.url_name}" src="" data-block_id="{self.url_name}"  
+data-player_url="{scorm_player_url}" data-display_type="{self.display_type}" data-display_width="{self.display_width}"
+data-display_height="{self.display_height}"
+data-get_url="{get_url}" data-set_url="{set_url}"
+data-course_location="{scorm_file}/" data-course_id="{self.course_id}"
+data-student_name="{self.student_name}" data-student_id="{self.student_id}"
+data-csrftoken=""
+${{player_config_attrs}}
+></iframe>

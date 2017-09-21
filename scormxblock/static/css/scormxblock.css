@@ -1,0 +1,23 @@
+/* CSS for ScormXBlock */
+
+
+.scormxblock_hostframe {
+	border: 0;
+	height: 300px;
+	width: 100%;
+	overflow-y: scroll
+}
+
+.scormxblock_block .scorm_description {
+	margin: 1em 0;
+	padding: 1em;
+	background: rgb(250,250,250);
+}
+
+.scormxblock_block .scorm_weight {
+	font-size: 80%;
+}
+
+.scormxblock_block .scorm_launch {
+	margin: 1em 0;
+}

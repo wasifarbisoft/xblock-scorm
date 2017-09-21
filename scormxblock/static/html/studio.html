@@ -1,0 +1,98 @@
+<div class="wrapper-comp-settings is-active editor-with-buttons" id="settings-tab">
+  <ul class="list-input settings-list">
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="display_name">Display Name</label>
+        <input class="input setting-input" name="display_name" id="display_name" value="${block.display_name}" type="text" />
+        <div class="setting-help" style="display:block">${block.fields['display_name'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="descrption">Description</label>
+        
+        <textarea class="input setting-input" name="description" id="description" cols="50" rows="6">${block.description}</textarea>
+        <div class="setting-help" style="display:block">${block.fields['description'].help}</div>
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="scorm_file">Upload SCORM File</label>
+        <input class="input setting-input" name="scorm_file" id="scorm_file" type="file" />
+        <div class="setting-help" style="display:block">${block.fields['scorm_file'].help}<br/><br/>Currently stored at: ${block.scorm_file}.</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="scorm_file">SCORM Player</label>
+        <select class="setting-input" name="scorm_player" id="scorm_player">
+          %for opt in block.fields['scorm_player'].values:
+              <option value="${opt['value']}" ${block.scorm_player == opt['value'] and 'selected'}>${opt['display_name']}</option>
+          %endfor
+        </select>
+        <div class="setting-help" style="display:block">${block.fields['scorm_player'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="weight">Weight</label>
+        <input class="input setting-input" name="weight" id="weight" value="${block.weight}" type="number" />
+      </div>
+      <div class="setting-help" style="display:block">${block.fields['weight'].help}</div>        
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <fieldset>
+          <legend class="label setting-label">Display Type</legend>
+          %for opt in block.fields['display_type'].values:
+            <label class="label" for="display_type_${opt}">${opt}</label> <input class="input setting-input" name="display_type" id="display_type_${opt}" ${block.display_type==opt and 'checked '} type="radio" value="${opt}" style="width:auto;height:auto" />
+          %endfor
+        </fieldset>
+        <div class="setting-help" style="display:block">${block.fields['display_type'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="display_width">Display Width</label>
+        <input class="input setting-input" name="display_width" id="display_width" value="${block.display_width}" type="number" />
+        <div class="setting-help" style="display:block">${block.fields['display_width'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="display_height">Display Height</label>
+        <input class="input setting-input" name="display_height" id="display_height" value="${block.display_height}" type="number" />
+        <div class="setting-help" style="display:block">${block.fields['display_height'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="encoding">Text Encoding</label>
+        <select class="input setting-input" name="encoding" id="encoding">
+          %for opt in block.fields['encoding'].values:
+            <option value="${opt['value']}" ${block.encoding == opt['value'] and 'selected'}>${opt['display_name']}</option>
+          %endfor
+        </select>  
+        <div class="setting-help" style="display:block">${block.fields['encoding'].help}</div>        
+      </div>
+    </li>
+        <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="player_configuration">Player Configuration</label>
+        <textarea class="input setting-input" name="player_configuration" id="player_configuration" cols="50" rows="10">${block.player_configuration}</textarea>
+        <div class="setting-help" style="display:block">${block.fields['player_configuration'].help}</div>        
+      </div>
+    </li>
+
+  </ul>
+  <div class="xblock-actions">
+    <ul>
+      <li class="action-item">
+        <a href="#" class="button action-primary save-button">Save</a>
+      </li>
+      <li class="action-item">
+        <a href="#" class="button cancel-button">Cancel</a>
+      </li>
+    </ul>
+  </div>
+</div>
