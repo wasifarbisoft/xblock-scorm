@@ -10,6 +10,7 @@ import encodings
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.utils import encoding
+from django.http import QueryDict
 from webob import Response
 
 from xblock.core import XBlock
@@ -168,6 +169,9 @@ class ScormXBlock(XBlock):
     def student_view(self, context=None, authoring=False):
         scheme = 'https' if settings.HTTPS == 'on' else 'http'
         lms_base = settings.ENV_TOKENS.get('LMS_BASE')
+        if isinstance(context, QueryDict):
+            context = context.dict()
+
         if microsite.is_request_in_microsite():
             subdomain = microsite.get_value("domain_prefix", None) or microsite.get_value('microsite_config_key')
             lms_base = "{}.{}".format(subdomain, lms_base) 
