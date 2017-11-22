@@ -6,6 +6,7 @@ import shutil
 import tempfile
 import logging
 import encodings
+import mimetypes
 
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -173,6 +174,7 @@ class ScormXBlock(XBlock):
             lms_base = "{}.{}".format(subdomain, lms_base) 
         scorm_player_url = ""
 
+        course_directory = self.scorm_file
         if self.scorm_player == 'SCORM_PKG_INTERNAL':
             # TODO: support initial filename other than index.html for internal players
             scorm_player_url = '{}://{}{}'.format(scheme, lms_base, self.scorm_file)
@@ -184,6 +186,7 @@ class ScormXBlock(XBlock):
                 scorm_player_url = player
             else:    
                 scorm_player_url = '{}://{}{}'.format(scheme, lms_base, player)
+            course_directory = self.runtime.handler_url(self, "proxy_content")
                     
         html = self.resource_string("static/html/scormxblock.html")
 
@@ -211,7 +214,7 @@ class ScormXBlock(XBlock):
                                                        get_url=get_url, set_url=set_url, 
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
                                                        player_config=player_config, 
-                                                       scorm_file=self.scorm_file)
+                                                       scorm_file=course_directory)
                                      ).render_unicode())
 
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
@@ -414,6 +417,25 @@ class ScormXBlock(XBlock):
         # TODO: handle errors
         return Response(json.dumps(self.raw_scorm_status), content_type='application/json', charset='UTF-8')
 
+    @XBlock.handler
+    def proxy_content(self, request, suffix=''):
+        storage = default_storage
+
+        contents = ''
+        content_type = 'application/octet-stream'
+        path_to_file = os.path.join(SCORM_STORAGE, self.location.block_id, suffix)
+
+        if storage.exists(path_to_file):
+            f = storage.open(path_to_file, 'rb')
+            contents = f.read()
+            ext = os.path.splitext(path_to_file)[1]
+            if ext in mimetypes.types_map:
+                content_type = mimetypes.types_map[ext]
+        else:
+            return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
+        return Response(contents, content_type=content_type)
+
+
     def _get_value_from_sco(self, sco, key, default):
         """
         return a set or default value from a key in a SCO
@@ -462,13 +484,14 @@ class ScormXBlock(XBlock):
         # in practice, SCOs will almost certainly have a max of 100
         # http://www.ostyn.com/blog/2006/09/scoring-in-scorm.html
         # TODO: handle variable max scores when we support SCORM2004+ or a better KESDEE workaround
-        self.runtime.publish(
-            self,
-            'grade',
-            {
-                'value': (float(score)/float(DEFAULT_SCO_MAX_SCORE)) * self.weight,
-                'max_value': self.weight,
-            })
+        if score != '':
+            self.runtime.publish(
+                self,
+                'grade',
+                {
+                    'value': (float(score)/float(DEFAULT_SCO_MAX_SCORE)) * self.weight,
+                    'max_value': self.weight,
+                })
 
     @staticmethod
     def workbench_scenarios():
