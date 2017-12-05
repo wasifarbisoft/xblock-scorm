@@ -183,13 +183,7 @@ class ScormXBlock(XBlock):
             # TODO: support initial filename other than index.html for internal players
             scorm_player_url = '{}://{}{}'.format(scheme, lms_base, self.scorm_file)
         elif self.scorm_player:
-            # SSLA: launch.htm?courseId=1&studentName=Caudill,Brian&studentId=1&courseDirectory=courses/SSLA_tryout
-            player_config = DEFINED_PLAYERS[self.scorm_player]
-            player = player_config['location']
-            if '://' in player:
-                scorm_player_url = player
-            else:    
-                scorm_player_url = '{}://{}{}'.format(scheme, lms_base, player)
+            scorm_player_url = self.runtime.local_resource_url(self, "public/ssla/player.htm")
             course_directory = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "proxy_content"))
 
         html = self.resource_string("static/html/scormxblock.html")
