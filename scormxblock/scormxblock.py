@@ -431,7 +431,7 @@ class ScormXBlock(XBlock):
                 content_type = mimetypes.types_map[ext]
         else:
             return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
-        return Response(contents, content_type=content_type, headerlist=[('X-Frame-Options', 'SAMEORIGIN')])
+        return Response(contents, content_type=content_type)
 
 
     def _get_value_from_sco(self, sco, key, default):
