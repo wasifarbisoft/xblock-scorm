@@ -10,6 +10,7 @@ import mimetypes
 
 from django.conf import settings
 from django.core.files.storage import default_storage
+from django.core.files.storage import get_storage_class
 from django.utils import encoding
 from django.http import QueryDict
 from webob import Response
@@ -193,7 +194,7 @@ class ScormXBlock(XBlock):
         if not authoring:
             get_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_raw_scorm_status"))
             set_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "set_raw_scorm_status"))
-        # PreviewModuleSystem (runtime Mixin from Studio) won't have a hostname            
+        # PreviewModuleSystem (runtime Mixin from Studio) won't have a hostname
         else:
             # we don't want to get/set SCORM status from preview
             get_url = set_url = '#'
@@ -209,9 +210,9 @@ class ScormXBlock(XBlock):
 
         frag = Fragment()
         frag.add_content(MakoTemplate(text=html.format(self=self, scorm_player_url=scorm_player_url,
-                                                       get_url=get_url, set_url=set_url, 
+                                                       get_url=get_url, set_url=set_url,
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
-                                                       player_config=player_config, 
+                                                       player_config=player_config,
                                                        scorm_file=course_directory)
                                      ).render_unicode())
 
@@ -226,7 +227,7 @@ class ScormXBlock(XBlock):
         # categories of blocks that are specified in lms/templates/staff_problem_info.html so this will
         # for now have to be overridden in theme or directly in edx-platform
         # TODO: is there another way to approach this?  key's location.category isn't mutable to spoof 'problem',
-        # like setting the name in the entry point to 'problem'.  Doesn't seem like a good idea.  Better to 
+        # like setting the name in the entry point to 'problem'.  Doesn't seem like a good idea.  Better to
         # have 'staff debuggable' categories configurable in settings or have an XBlock declare itself staff debuggable
         if SCORM_DISPLAY_STAFF_DEBUG_INFO and not authoring:  # don't show for author preview
             from courseware.access import has_access
@@ -268,6 +269,13 @@ class ScormXBlock(XBlock):
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
 
+        # initializing S3 storage with private acl
+        if settings.ENV_TOKENS.get('DEFAULT_FILE_STORAGE') == 'storages.backends.s3boto.S3BotoStorage':
+            s3_boto_storage_class = get_storage_class()
+            storage = s3_boto_storage_class(acl='private')
+        else:
+            storage = default_storage
+
         if request.params['player_configuration']:
             try:
                 json.loads(request.params['player_configuration'])  # just validation
@@ -281,8 +289,7 @@ class ScormXBlock(XBlock):
         if hasattr(request.params['file'], 'file'):
             file = request.params['file'].file
             zip_file = zipfile.ZipFile(file, 'r')
-            storage = default_storage
-            
+
             path_to_file = os.path.join(SCORM_STORAGE, self.location.block_id)
 
             if storage.exists(os.path.join(path_to_file, 'imsmanifest.xml')):
@@ -370,10 +377,10 @@ class ScormXBlock(XBlock):
 
     def _init_scos(self):
         """
-        initialize all SCOs with proper credit and status values in case 
+        initialize all SCOs with proper credit and status values in case
         content package does not do this correctly
         """
-        
+
         # set all scos lesson status to 'not attempted'
         # set credit/no-credit on all scos
         credit = self.weight > 0 and 'credit' or 'no-credit'
@@ -383,7 +390,7 @@ class ScormXBlock(XBlock):
 
     @XBlock.handler
     def get_raw_scorm_status(self, request, suffix=''):
-        """ 
+        """
         retrieve JSON SCORM API status as stored by SSLA player (or potentially others)
         """
         # TODO: handle errors
@@ -405,7 +412,7 @@ class ScormXBlock(XBlock):
             self._init_scos()
 
         self.raw_scorm_status = data
-                
+
         self.lesson_status = new_status
 
         score = scorm_data.get('score')
@@ -418,7 +425,6 @@ class ScormXBlock(XBlock):
     @XBlock.handler
     def proxy_content(self, request, suffix=''):
         storage = default_storage
-
         contents = ''
         content_type = 'application/octet-stream'
         path_to_file = os.path.join(SCORM_STORAGE, self.location.block_id, suffix)
