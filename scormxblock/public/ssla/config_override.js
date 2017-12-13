@@ -18,12 +18,15 @@ var sslaConfig = {
     closePopupMultiScoBehavior: "",
     singleScoView: "HIDE_ALL",
     popupMainContentMessageAfterOpen: function() {
-        return '<a style="font-family: \'Open Sans\', Arial, sans-serif; font-size: 14px; color: #3384CA;" onclick="parent.ssla.ssla.popupManually()" href="#">Click here to open the content experience.</a>';
+        return '<a style="pointer-events: none; font-family: \'Open Sans\', Arial, sans-serif; font-size: 14px; color: #cccccc;" href="#">Click here to open the content experience.</a>';
     },
     popupMainContentMessageFailed: function() {
-        return '<a style="font-family: \'Open Sans\', Arial, sans-serif; font-size: 14px; color: #3384CA;" onclick="parent.ssla.ssla.popupManually()" href="#">Click here to open the content experience.</a>';
+        return '<a style="font-family: \'Open Sans\', Arial, sans-serif; font-size: 14px; color: #3384CA;" onclick="parent.ssla.ssla.popupManually();" href="#">Click here to open the content experience.</a>';
     }
 };
+
+
+
 
 
 var messageData = null;
