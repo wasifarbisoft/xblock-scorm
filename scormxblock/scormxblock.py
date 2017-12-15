@@ -270,7 +270,7 @@ class ScormXBlock(XBlock):
         self.encoding = request.params['encoding']
 
         # initializing S3 storage with private acl
-        if settings.ENV_TOKENS.get('DEFAULT_FILE_STORAGE') == 'storages.backends.s3boto.S3BotoStorage':
+        if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
             s3_boto_storage_class = get_storage_class()
             storage = s3_boto_storage_class(acl='private')
         else:
