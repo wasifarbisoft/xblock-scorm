@@ -7,7 +7,7 @@ var sslaConfig = {
     setDataHeaders: dataHeaders,
     getDataHeaders: dataHeaders,
     openContentIn: openContentIn,
-    popupWindowParams: popupWindowParams,
+    //popupWindowParams: popupWindowParams,
     courseId: courseId,
     courseDirectory: courseDirectory,
     studentId: studentId,
@@ -22,7 +22,8 @@ var sslaConfig = {
     },
     popupMainContentMessageFailed: function() {
         return '<a style="font-family: \'Open Sans\', Arial, sans-serif; font-size: 14px; color: #3384CA;" onclick="parent.ssla.ssla.popupManually();" href="#">Click here to open the content experience.</a>';
-    }
+    },
+    popupWindowParams: "status=1,toolbar=1,scrollbars=yes,resizable=yes,alwaysRaised=1"
 };
 
 
