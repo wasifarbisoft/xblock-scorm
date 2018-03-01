@@ -7,11 +7,12 @@ import tempfile
 import logging
 import encodings
 import mimetypes
+import re
 
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.storage import get_storage_class
-from django.utils import encoding
+from django.core.cache import cache
 from django.http import QueryDict
 from webob import Response
 
@@ -24,12 +25,12 @@ from microsite_configuration import microsite
 
 from mako.template import Template as MakoTemplate
 
+from .scorm_file_uploader import ScormPackageUploader, STATE as UPLOAD_STATE
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
 
 logger = logging.getLogger(__name__)
-
 
 # importing directly from settings.XBLOCK_SETTINGS doesn't work here... doesn't have vals from ENV TOKENS yet
 scorm_settings = settings.ENV_TOKENS['XBLOCK_SETTINGS']['ScormXBlock']
@@ -44,8 +45,8 @@ SCORM_COMPLETE_STATUSES = (u'complete', u'passed', u'failed')
 
 AVAIL_ENCODINGS = encodings.aliases.aliases
 
-class ScormXBlock(XBlock):
 
+class ScormXBlock(XBlock):
     has_score = True
     has_author_view = True
 
@@ -255,8 +256,49 @@ class ScormXBlock(XBlock):
         frag.add_content(MakoTemplate(text=html).render_unicode(**context))
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
         frag.add_javascript(self.resource_string("static/js/src/studio.js"))
+        frag.add_javascript_url(self.runtime.local_resource_url(self, 'public/jquery.fileupload.js'))
         frag.initialize_js('ScormStudioXBlock')
         return frag
+
+    @XBlock.handler
+    def upload_status(self, request, suffix=''):
+        """
+        Scorm package upload to storage status
+        """
+        upload_percent = ScormPackageUploader.get_upload_percentage(self.location.block_id)
+
+        logger.info('Upload percentage is: {}'.format(upload_percent))
+
+        return Response(json.dumps({"progress": upload_percent}))
+
+    @XBlock.handler
+    def file_upload_handler(self, request, suffix=''):
+        """
+        Handler for scorm file upload
+        """
+        response = {}
+        scorm_uploader = ScormPackageUploader(
+            request=request, xblock=self,
+            scorm_storage_location=SCORM_STORAGE
+        )
+
+        try:
+            state, data = scorm_uploader.upload()
+        except Exception as e:
+            logger.error('Scorm package upload error: {}'.format(e.message))
+            ScormPackageUploader.clear_percentage_cache(self.location.block_id)
+            return Response(json.dumps({'status': 'error', 'message': e.message}))
+
+        if state == UPLOAD_STATE.PROGRESS:
+            response = {"files": [{
+                "size": data
+            }]}
+        elif state == UPLOAD_STATE.COMPLETE and data:
+            ScormPackageUploader.clear_percentage_cache(self.location.block_id)
+            self.scorm_file = data
+            response = {'status': 'OK'}
+
+        return Response(json.dumps(response))
 
     @XBlock.handler
     def studio_submit(self, request, suffix=''):
@@ -269,64 +311,12 @@ class ScormXBlock(XBlock):
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
 
-        # initializing S3 storage with private acl
-        if settings.DEFAULT_FILE_STORAGE == 'storages.backends.s3boto.S3BotoStorage':
-            s3_boto_storage_class = get_storage_class()
-            storage = s3_boto_storage_class(acl='private')
-        else:
-            storage = default_storage
-
         if request.params['player_configuration']:
             try:
                 json.loads(request.params['player_configuration'])  # just validation
                 self.player_configuration = request.params['player_configuration']
             except ValueError, e:
                 return Response(json.dumps({'result': 'failure', 'error': 'Invalid JSON in Player Configuration'.format(e)}), content_type='application/json')
-
-        # scorm_file should only point to the path where imsmanifest.xml is located
-        # scorm_player will have the index.html, launch.htm, etc. location for the JS player
-        # TODO: the below could fail after deleting all of the contents from the storage. to handle
-        if hasattr(request.params['file'], 'file'):
-            file = request.params['file'].file
-            zip_file = zipfile.ZipFile(file, 'r')
-
-            path_to_file = os.path.join(SCORM_STORAGE, self.location.block_id)
-
-            if storage.exists(os.path.join(path_to_file, 'imsmanifest.xml')):
-                try:
-                    shutil.rmtree(os.path.join(storage.location, path_to_file))
-                except OSError:
-                    # TODO: for now we are going to assume this means it's stored on S3 if not local
-                    try:
-                        for key in storage.bucket.list(prefix=path_to_file):
-                            key.delete()
-                    except AttributeError:
-                        return Response(json.dumps({'result': 'failure', 'error': 'Unsupported storage. Unable to overwrite old SCORM package contents'}), content_type='application/json')
-
-            tempdir = tempfile.mkdtemp()
-            zip_file.extractall(tempdir)
-
-            to_store = []
-            for (dirpath, dirnames, files) in os.walk(tempdir):
-                for f in files:
-                    to_store.append(os.path.join(os.path.abspath(dirpath), f))
-
-            # TODO: look at optimization of file handling, save
-
-            for f in to_store:
-                # defensive decode/encode from zip
-                f_path = f.decode(self.encoding).encode('utf-8').replace(tempdir, '')
-                with open(f, 'rb+') as fh:
-                    try:
-                        storage.save('{}{}'.format(path_to_file, f_path), fh)
-                    except encoding.DjangoUnicodeDecodeError, e:
-                        logger.warn('SCORM XBlock Couldn\'t store file {} to storage. {}'.format(f, e))
-
-            shutil.rmtree(tempdir)
-
-            # strip querystrings
-            url = storage.url(path_to_file)
-            self.scorm_file = '?' in url and url[:url.find('?')] or url
 
         return Response(json.dumps({'result': 'success'}), content_type='application/json')
 

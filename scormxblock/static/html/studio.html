@@ -18,8 +18,26 @@
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
         <label class="label setting-label" for="scorm_file">Upload SCORM File</label>
+        <a href="#" class="action action-choose-file choose-file-button" id="scorm-file-select">
+          <span class="icon fa fa-upload" aria-hidden="true"></span>
+          <span class="copy">Choose a File to Import</span>
+        </a>
+        <span class="file-chosen"></span>
         <input class="input setting-input" name="scorm_file" id="scorm_file" type="file" />
-        <div class="setting-help" style="display:block">${block.fields['scorm_file'].help}<br/><br/>Currently stored at: ${block.scorm_file}.</div>        
+        <div class="setting-help" style="display:block">${block.fields['scorm_file'].help}<br/>Currently stored at: ${block.scorm_file}.</div>
+
+        <div class="status-container">
+          <span class="status-element current-step"></span>
+          <div class="status-element progress-container">
+            <div class="progress">
+              <div class="bar"></div>
+            </div>
+          </div>
+          <span class="status-element progress-percent">0%</span>
+          <br class="clear" />
+          <p class="success-msg"></p>
+        </div>
+
       </div>
     </li>
     <li class="field comp-setting-entry is-set">
