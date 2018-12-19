@@ -23,6 +23,7 @@ function ScormStudioXBlock(runtime, element) {
       if(percentVal == '100%'){
         clearInterval(pollingParams.id);
         $(element).find('.status-container .success-msg').text('Scorm package has been succesfully uploaded!');
+         $(element).find('.save-button').removeClass('disabled');
       }else{
         pollingParams.id = setTimeout(pollUploadStatus, pollingParams.interval);
       }
@@ -46,6 +47,7 @@ function ScormStudioXBlock(runtime, element) {
       $(element).find('#scorm-file-select').hide();
       $(element).find('.file-chosen').text('File Chosen: ' + file.name);
       $(element).find('.status-container').show();
+      $(element).find('.save-button').addClass('disabled')
 
       data.submit().complete(function(result, textStatus, xhr) {
           if(result.status == 'error'){
@@ -54,6 +56,7 @@ function ScormStudioXBlock(runtime, element) {
             $(element).find('.file-chosen').text('');
             $(element).find('#scorm-file-select').show();
             $(element).find('.status-container').hide();
+            $(element).find('.save-button').removeClass('disabled')
           }
       });
 
