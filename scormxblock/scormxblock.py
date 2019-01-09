@@ -26,6 +26,7 @@ from microsite_configuration import microsite
 from mako.template import Template as MakoTemplate
 
 from .scorm_file_uploader import ScormPackageUploader, STATE as UPLOAD_STATE
+from . import constants
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -41,7 +42,6 @@ SCORM_PKG_INTERNAL = {"value": "SCORM_PKG_INTERNAL", "display_name": "Internal P
 DEFAULT_SCO_MAX_SCORE = 100
 DEFAULT_IFRAME_WIDTH = 800
 DEFAULT_IFRAME_HEIGHT = 400
-SCORM_COMPLETE_STATUSES = (u'complete', u'passed', u'failed')
 
 AVAIL_ENCODINGS = encodings.aliases.aliases
 
@@ -49,6 +49,7 @@ AVAIL_ENCODINGS = encodings.aliases.aliases
 class ScormXBlock(XBlock):
     has_score = True
     has_author_view = True
+    has_custom_completion = True
 
     display_name = String(
         display_name=_("Display Name"),
@@ -409,9 +410,9 @@ class ScormXBlock(XBlock):
         self.raw_scorm_status = data
 
         self.lesson_status = new_status
-
-        score = scorm_data.get('score')
+        score = scorm_data.get('score', '')
         self._publish_grade(new_status, score)
+        self.publish_progress(scorm_data)
         self.save()
 
         # TODO: handle errors
@@ -491,6 +492,19 @@ class ScormXBlock(XBlock):
                     'value': (float(score)/float(DEFAULT_SCO_MAX_SCORE)) * self.weight,
                     'max_value': self.weight,
                 })
+
+    def publish_progress(self, scorm_data):
+        """
+        Mark 100% completion if course is complete
+        """
+        if scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
+            self._publish_progress(1.0)
+
+    def _publish_progress(self, completion):
+        """
+        Update completion by calling the completion API
+        """
+        self.runtime.publish(self, 'completion', {'completion': completion})
 
     @staticmethod
     def workbench_scenarios():
