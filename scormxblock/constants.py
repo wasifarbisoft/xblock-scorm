@@ -1,1 +1,1 @@
-SCORM_COMPLETE_STATUSES = ['completed', 'passed']
+SCORM_COMPLETION_STATUS = ['completed', 'passed']
