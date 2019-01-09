@@ -497,7 +497,7 @@ class ScormXBlock(XBlock):
         """
         Mark 100% completion if course is complete
         """
-        if scorm_data.get('status', '') in constants.SCORM_COMPLETE_STATUSES:
+        if scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
             self._publish_progress(1.0)
 
     def _publish_progress(self, completion):
