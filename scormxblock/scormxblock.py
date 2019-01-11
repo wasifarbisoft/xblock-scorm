@@ -499,7 +499,7 @@ class ScormXBlock(XBlock):
         Else check status and mark 100% completion if course is complete
         """
         progress_measure = self.calculate_progress_measure(scorm_data)
-        if progress_measure > 0:
+        if progress_measure:
             self._publish_progress(progress_measure)
         elif scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
             self._publish_progress(1.0)
@@ -525,7 +525,7 @@ class ScormXBlock(XBlock):
                 pass
 
         return progress_sum / len(scos) if len(scos) else 0
-        
+
     @staticmethod
     def workbench_scenarios():
         """A canned scenario for display in the workbench."""
