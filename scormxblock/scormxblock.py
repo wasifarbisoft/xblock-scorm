@@ -495,9 +495,13 @@ class ScormXBlock(XBlock):
 
     def publish_progress(self, scorm_data):
         """
-        Mark 100% completion if course is complete
+        Update progress % if cmi.progress_measure is emitted
+        Else check status and mark 100% completion if course is complete
         """
-        if scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
+        progress_measure = self.calculate_progress_measure(scorm_data)
+        if progress_measure:
+            self._publish_progress(progress_measure)
+        elif scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
             self._publish_progress(1.0)
 
     def _publish_progress(self, completion):
@@ -505,6 +509,22 @@ class ScormXBlock(XBlock):
         Update completion by calling the completion API
         """
         self.runtime.publish(self, 'completion', {'completion': completion})
+
+    def calculate_progress_measure(self, scorm_data):
+        """
+        Returns the averaged progress_measure of all scos in the current scorm content
+        :return: progress_measure if found, else 0
+        """
+        progress_sum = 0
+        scos = scorm_data.get('scos', {})
+        for sco in scos.values():
+            sco_data = sco.get('data', {})
+            try:
+                progress_sum += float(sco_data.get('cmi.progress_measure', '0.0'))
+            except (ValueError, AttributeError):
+                pass
+
+        return progress_sum / len(scos) if len(scos) else 0
 
     @staticmethod
     def workbench_scenarios():
