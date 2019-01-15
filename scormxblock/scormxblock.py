@@ -516,7 +516,7 @@ class ScormXBlock(XBlock):
         :return: progress_measure if found, else 0
         """
         progress_sum = 0
-        scos = scorm_data.get('scos', [])
+        scos = scorm_data.get('scos', {})
         for sco in scos.values():
             sco_data = sco.get('data', {})
             try:
