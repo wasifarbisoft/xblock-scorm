@@ -439,36 +439,52 @@ class ScormXBlock(XBlock):
             return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
+    def generate_report_data(self, user_state_iterator, limit_responses=None):
+        """
+        Return a list of student responses to this block in a readable way.
+        Arguments:
+            user_state_iterator: iterator over UserStateClient objects.
+                E.g. the result of user_state_client.iter_all_for_block(block_key)
+            limit_responses (int|None): maximum number of responses to include.
+                Set to None (default) to include all.
+        Returns:
+            each call returns a tuple like:
+            ("username", {
+                           "Question": "What's your favorite color?"
+                           "Answer": "Red",
+                           "Submissions count": 1
+            })
+        """
 
-    @XBlock.handler
-    def get_submissions(self, request, suffix=''):
-        student_modules = self._get_student_modules(request)
-        submissions = self.format_submissions(student_modules)
-        return Response(json.dumps(submissions), content_type='application/json', charset='UTF-8')
+        count = 0
+        for user_state in user_state_iterator:
+            for report in self._get_user_report(user_state.state):
 
-    def _get_student_modules(self, request):
-        course_id = CourseKey.from_string(request.GET['course_id'])
-        module_id = UsageKey.from_string(request.GET['module_id'])
-        student_modules = StudentModule.objects.filter(course_id=course_id, module_state_key=module_id)
-        return student_modules
+                if limit_responses is not None and count >= limit_responses:
+                    # End the iterator here
+                    return
 
-    def format_submissions(self, student_modules):
+                count += 1
+                yield (user_state.username, report)
+
+    def _get_user_report(self, user_state):
         interaction_prefix = "cmi.interactions."
-        user_submissions = []
-        for student_module in student_modules:
-            user_state = student_module.state
-            raw_status = json.loads(json.loads(user_state)['raw_scorm_status'])
-            scos = raw_status.get('scos', {})
-            for sco in scos.values():
-                sco_data = sco.get('data') or {}
-                for interaction_index in range(sco_data.get(interaction_prefix + '_count', 0)):
-                    current_interaction_prefix = interaction_prefix + str(interaction_index) + "."
-                    user_submissions.append({
-                        "username": student_module.student.username,
-                        "question": sco_data.get(current_interaction_prefix + "description"),
-                        "answer": sco_data.get(current_interaction_prefix + "learner_response")
-                    })
-        return user_submissions
+        raw_status = json.loads(user_state['raw_scorm_status'])
+        scos = raw_status.get('scos', {})
+
+        for sco in scos.values():
+            sco_data = sco.get('data') or {}
+            interactions_count = sco_data.get(interaction_prefix + '_count', 0)
+
+            for interaction_index in range(interactions_count):
+                current_interaction_prefix = interaction_prefix + str(interaction_index) + "."
+
+                report = {
+                    self.ugettext('Question'): sco_data.get(current_interaction_prefix + "description"),
+                    self.ugettext('Answer'): sco_data.get(current_interaction_prefix + "learner_response"),
+                    self.ugettext('Submissions count'): interactions_count
+                }
+                yield report
 
     def _get_value_from_sco(self, sco, key, default):
         """
