@@ -17,9 +17,11 @@ from django.http import QueryDict
 from webob import Response
 
 from xblock.core import XBlock
+from opaque_keys.edx.keys import CourseKey, UsageKey
 from xblock.fields import Scope, String, Integer, Boolean, Float
 from xblock.fragment import Fragment
 
+from courseware.models import StudentModule
 from openedx.core.lib.xblock_utils import add_staff_markup
 from microsite_configuration import microsite
 
@@ -437,6 +439,36 @@ class ScormXBlock(XBlock):
             return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
+
+    @XBlock.handler
+    def get_submissions(self, request, suffix=''):
+        student_modules = self._get_student_modules(request)
+        submissions = self.format_submissions(student_modules)
+        return Response(json.dumps(submissions), content_type='application/json', charset='UTF-8')
+
+    def _get_student_modules(self, request):
+        course_id = CourseKey.from_string(request.GET['course_id'])
+        module_id = UsageKey.from_string(request.GET['module_id'])
+        student_modules = StudentModule.objects.filter(course_id=course_id, module_state_key=module_id)
+        return student_modules
+
+    def format_submissions(self, student_modules):
+        interaction_prefix = "cmi.interactions."
+        user_submissions = []
+        for student_module in student_modules:
+            user_state = student_module.state
+            raw_status = json.loads(json.loads(user_state)['raw_scorm_status'])
+            scos = raw_status.get('scos', {})
+            for sco in scos.values():
+                sco_data = sco.get('data') or {}
+                for interaction_index in range(sco_data.get(interaction_prefix + '_count', 0)):
+                    current_interaction_prefix = interaction_prefix + str(interaction_index) + "."
+                    user_submissions.append({
+                        "username": student_module.student.username,
+                        "question": sco_data.get(current_interaction_prefix + "description"),
+                        "answer": sco_data.get(current_interaction_prefix + "learner_response")
+                    })
+        return user_submissions
 
     def _get_value_from_sco(self, sco, key, default):
         """
