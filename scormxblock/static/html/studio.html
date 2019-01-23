@@ -69,6 +69,24 @@
         <div class="setting-help" style="display:block">${block.fields['display_type'].help}</div>        
       </div>
     </li>
+    <li class="field comp-setting-entry is-set" id="popup_type">
+      <div class="wrapper-comp-setting">
+        <fieldset>
+          <legend class="label setting-label">Popup Launch Type</legend>
+          %for opt in block.fields['popup_launch_type'].values:
+            <label class="label" for="popup_launch_type_${opt}">${opt}</label> <input class="input setting-input" name="popup_launch_type" id="popup_launch_type_${opt}" ${block.popup_launch_type==opt and 'checked '} type="radio" value="${opt}" style="width:auto;height:auto" />
+          %endfor
+        </fieldset>
+        <div class="setting-help" style="display:block">${block.fields['popup_launch_type'].help}</div>
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set" id="launch_button">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="launch_button_text">Launch Button Text</label>
+        <input class="input setting-input" maxlength="20" name="launch_button_text" id="launch_button_text" value="${block.launch_button_text}" type="text" />
+        <div class="setting-help" style="display:block">${block.fields['launch_button_text'].help}</div>
+      </div>
+    </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
         <label class="label setting-label" for="display_width">Display Width</label>
