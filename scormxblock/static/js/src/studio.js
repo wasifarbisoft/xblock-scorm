@@ -83,9 +83,14 @@ function ScormStudioXBlock(runtime, element) {
     var display_width = $(element).find('input[name=display_width]').val();
     var display_height = $(element).find('input[name=display_height]').val();
     var display_type = $(element).find('input[name=display_type]:checked').val();
+    var popup_launch_type = $(element).find('input[name=popup_launch_type]:checked').val();
+    var launch_button_text = $(element).find('input[name=launch_button_text]').val();
     var scorm_player = $(element).find('select[name=scorm_player]').val();
     var encoding = $(element).find('select[name=encoding]').val();
     var player_configuration = $(element).find('textarea[name=player_configuration]').val();
+    if (!launch_button_text){
+      launch_button_text = 'Launch'
+    }
     form_data.append('file', file_data);
     form_data.append('display_name', display_name);
     form_data.append('description', description);
@@ -93,6 +98,8 @@ function ScormStudioXBlock(runtime, element) {
     form_data.append('display_height', display_height);
     form_data.append('weight', weight);
     form_data.append('display_type', display_type);
+    form_data.append('popup_launch_type', popup_launch_type);
+    form_data.append('launch_button_text', launch_button_text);
     form_data.append('scorm_player', scorm_player);
     form_data.append('encoding', encoding);
     form_data.append('player_configuration', player_configuration);
@@ -117,4 +124,41 @@ function ScormStudioXBlock(runtime, element) {
     runtime.notify('cancel', {});
   });
 
+  $(element).find('input[name=display_type]').bind('click', function() {
+    showPopupLaunchType()
+  });
+
+  $(element).find('input[name=popup_launch_type]').bind('click', function() {
+    var display_type_popup = true;
+    showLaunchButtonTextField(display_type_popup)
+
+  });
+
+  function showPopupLaunchType() {
+      var display_type = $(element).find('input[name=display_type]:checked').val();
+      var display_type_popup = false;
+      if(display_type === 'popup'){
+        $(element).find('#popup_type').show();
+        display_type_popup = true;
+        showLaunchButtonTextField(display_type_popup)
+      }
+      else{
+        $(element).find('#popup_type').hide();
+        showLaunchButtonTextField(display_type_popup)
+      }
+  }
+
+  function showLaunchButtonTextField(display_type_popup) {
+        var popup_launch_type = $(element).find('input[name=popup_launch_type]:checked').val();
+        if(display_type_popup === true && popup_launch_type === 'manual'){
+          $(element).find('#launch_button').show();
+        }
+        else{
+          $(element).find('#launch_button').hide();
+        }
+  }
+
+  $(function ($) {
+      showPopupLaunchType();
+    })
 }

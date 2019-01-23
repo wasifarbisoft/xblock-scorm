@@ -81,24 +81,33 @@ function ScormXBlock_${block_id}(runtime, element) {
 
     //post message with data to player frame
     //player must be in an iframe and not a popup due to limitations in Internet Explorer's postMessage implementation
-    launch_btn_${block_id} = $('#scorm-launch-${block_id}');
     host_frame_${block_id} = $('#scormxblock-${block_id}');
     host_frame_${block_id}.data('csrftoken', $.cookie('csrftoken'));
-    launch_btn_${block_id}.on('click', function() {
-      playerWin = null;
-      if (host_frame_${block_id}.data('display_type') == 'iframe') {
-        host_frame_${block_id}.css('height', host_frame_${block_id}.data('display_height') + 'px');
-      }
-      host_frame_${block_id}.attr('src',host_frame_${block_id}.data('player_url'));
-      $(host_frame_${block_id}).on('load', function() {
-        playerWin = host_frame_${block_id}[0].contentWindow;
-        playerWin.postMessage(host_frame_${block_id}.data(), '*');
-         launch_btn_${block_id}.attr('disabled','true');
-      });
+    if (host_frame_${block_id}.data('display_type') == 'iframe') {
+      host_frame_${block_id}.css('height', host_frame_${block_id}.data('display_height') + 'px');
+      showScormContent(host_frame_${block_id})
+    }
+    else if ((host_frame_${block_id}.data('display_type') == 'popup') && (host_frame_${block_id}.data('popup_launch_type') == 'auto')){
+      showScormContent(host_frame_${block_id})
+    }
+    else{
+      launch_btn_${block_id} = $('#scorm-launch-${block_id}');
+      launch_btn_${block_id}.on('click', function() {
+        showScormContent(host_frame_${block_id})
+        launch_btn_${block_id}.attr('disabled','true')
+        });
       $(host_frame_${block_id}).on('unload', function() {
         launch_btn_${block_id}.removeAttr('disabled');
       })
-    });    
-
+    }
   });
+
+  function showScormContent(host_frame) {
+    playerWin = null;
+    host_frame.attr('src',host_frame.data('player_url'));
+    $(host_frame).on('load', function() {
+      playerWin = host_frame[0].contentWindow;
+      playerWin.postMessage(host_frame.data(), '*');
+    });
+}
 }

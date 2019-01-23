@@ -103,6 +103,19 @@ class ScormXBlock(XBlock):
         help=_("Open in a new popup window, or an iframe.  This setting may be overridden by player-specific configuration."),
         scope=Scope.settings
     )
+    popup_launch_type = String(
+        display_name =_("Popup Launch Type"),
+        values=["auto", "manual"],
+        default="auto",
+        help=_("Open in a new popup through button or automatically."),
+        scope=Scope.settings
+    )
+    launch_button_text = String(
+        display_name =_("Launch Button Text"),
+        help=_("Display text for Launch Button"),
+        default="Launch",
+        scope=Scope.settings
+    )
     display_width = Integer(
         display_name =_("Display Width (px)"),
         help=_('Width of iframe or popup window'),
@@ -163,7 +176,7 @@ class ScormXBlock(XBlock):
         if hasattr(key, 'to_deprecated_string'):
             return key.to_deprecated_string()
         else:
-            return unicode(key)        
+            return unicode(key)
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -178,7 +191,7 @@ class ScormXBlock(XBlock):
 
         if microsite.is_request_in_microsite():
             subdomain = microsite.get_value("domain_prefix", None) or microsite.get_value('microsite_config_key')
-            lms_base = "{}.{}".format(subdomain, lms_base) 
+            lms_base = "{}.{}".format(subdomain, lms_base)
         scorm_player_url = ""
 
         course_directory = self.scorm_file
@@ -209,7 +222,7 @@ class ScormXBlock(XBlock):
         # if display type is popup, don't use the full window width for the host iframe
         iframe_width = self.display_type=='popup' and DEFAULT_IFRAME_WIDTH or self.display_width;
         iframe_height = self.display_type=='popup' and DEFAULT_IFRAME_HEIGHT or self.display_height;
-
+        show_popup_manually = True if self.display_type=='popup' and self.popup_launch_type=='manual' else False;
         try:
             player_config = json.loads(self.player_configuration)
         except ValueError:
@@ -220,6 +233,7 @@ class ScormXBlock(XBlock):
                                                        get_url=get_url, set_url=set_url,
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
                                                        player_config=player_config,
+                                                       show_popup_manually=show_popup_manually,
                                                        scorm_file=course_directory)
                                      ).render_unicode())
 
@@ -314,6 +328,8 @@ class ScormXBlock(XBlock):
         self.display_width = request.params['display_width']
         self.display_height = request.params['display_height']
         self.display_type = request.params['display_type']
+        self.launch_button_text = request.params['launch_button_text']
+        self.popup_launch_type = request.params['popup_launch_type']
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
 
@@ -474,11 +490,11 @@ class ScormXBlock(XBlock):
         """
         publish the grade in the LMS.
         """
-        
+
         # We must do this regardless of the lesson
-        # status to avoid race condition issues where a grade of None might overwrite a 
+        # status to avoid race condition issues where a grade of None might overwrite a
         # grade value for incomplete lesson statuses.
-        
+
         # translate the internal score as a percentage of block's weight
         # we are assuming here the best practice for SCORM 1.2 of a max score of 100
         # if we weren't dealing with KESDEE publisher's incorrect usage of cmi.core.score.max
