@@ -425,12 +425,13 @@ class ScormXBlock(XBlock):
         if not self.scorm_initialized:
             self._init_scos()
 
+        old_scorm_data = json.loads(self.raw_scorm_status)
         self.raw_scorm_status = data
 
         self.lesson_status = new_status
         score = scorm_data.get('score', '')
         self._publish_grade(new_status, score)
-        self.publish_progress(scorm_data)
+        self.publish_progress(old_scorm_data, scorm_data)
         self.save()
 
         # TODO: handle errors
@@ -511,15 +512,17 @@ class ScormXBlock(XBlock):
                     'max_value': self.weight,
                 })
 
-    def publish_progress(self, scorm_data):
+    def publish_progress(self, old_scorm_data, current_scorm_data):
         """
-        Update progress % if cmi.progress_measure is emitted
+        Update progress % if cmi.progress_measure is emitted (i.e. it exists)
         Else check status and mark 100% completion if course is complete
         """
-        progress_measure = self.calculate_progress_measure(scorm_data)
+        progress_measure = self.calculate_progress_measure(current_scorm_data)
         if progress_measure:
-            self._publish_progress(progress_measure)
-        elif scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
+            # We do not want the elif to run if progress_measure exits but is invalid
+            if self.is_progress_measure_valid(progress_measure, old_scorm_data):
+                self._publish_progress(progress_measure)
+        elif current_scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
             self._publish_progress(1.0)
 
     def mark_in_progress(self, scorm_response_body):
@@ -552,6 +555,24 @@ class ScormXBlock(XBlock):
                 pass
 
         return progress_sum / len(scos) if len(scos) else 0
+
+    def is_progress_measure_valid(self, current_progress_measure, old_scorm_data):
+        """
+        - Checks if the current progress (to be updated on the LMS) is greater than
+        the previously stored progress
+        - This is done to ensure that restarting a scorm course does not resets its
+        progress on our LMS
+        """
+        if old_scorm_data:
+            # If old data exists for comparison
+            old_progress_measure = self.calculate_progress_measure(old_scorm_data)
+            if old_progress_measure:
+                if current_progress_measure > old_progress_measure:
+                    return True
+            return False
+        else:
+            # If nothing to compare, return valid
+            return True
 
     @staticmethod
     def workbench_scenarios():
