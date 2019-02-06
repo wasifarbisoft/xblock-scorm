@@ -17,11 +17,9 @@ from django.http import QueryDict
 from webob import Response
 
 from xblock.core import XBlock
-from opaque_keys.edx.keys import CourseKey, UsageKey
 from xblock.fields import Scope, String, Integer, Boolean, Float
 from xblock.fragment import Fragment
 
-from courseware.models import StudentModule
 from openedx.core.lib.xblock_utils import add_staff_markup
 from microsite_configuration import microsite
 
@@ -48,6 +46,7 @@ DEFAULT_IFRAME_HEIGHT = 400
 AVAIL_ENCODINGS = encodings.aliases.aliases
 
 
+@XBlock.needs('i18n')
 class ScormXBlock(XBlock):
     has_score = True
     has_author_view = True
