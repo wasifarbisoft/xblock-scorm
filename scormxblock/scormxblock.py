@@ -46,6 +46,7 @@ DEFAULT_IFRAME_HEIGHT = 400
 AVAIL_ENCODINGS = encodings.aliases.aliases
 
 
+@XBlock.needs('i18n')
 class ScormXBlock(XBlock):
     has_score = True
     has_author_view = True
@@ -454,6 +455,52 @@ class ScormXBlock(XBlock):
             return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
+    def generate_report_data(self, user_state_iterator, limit_responses=None):
+        """
+        Return a list of student responses to this block in a readable way.
+        Arguments:
+            user_state_iterator: iterator over UserStateClient objects.
+                E.g. the result of user_state_client.iter_all_for_block(block_key)
+            limit_responses (int|None): maximum number of responses to include.
+                Set to None (default) to include all.
+        Returns:
+            each call returns a tuple like:
+            ("username", {
+                           "Question": "What's your favorite color?"
+                           "Answer": "Red",
+                           "Submissions count": 1
+            })
+        """
+
+        count = 0
+        for user_state in user_state_iterator:
+            for report in self._get_user_report(user_state.state):
+
+                if limit_responses is not None and count >= limit_responses:
+                    # End the iterator here
+                    return
+
+                count += 1
+                yield (user_state.username, report)
+
+    def _get_user_report(self, user_state):
+        interaction_prefix = "cmi.interactions."
+        raw_status = json.loads(user_state['raw_scorm_status'])
+        scos = raw_status.get('scos', {})
+
+        for sco in scos.values():
+            sco_data = sco.get('data') or {}
+            interactions_count = sco_data.get(interaction_prefix + '_count', 0)
+
+            for interaction_index in range(interactions_count):
+                current_interaction_prefix = interaction_prefix + str(interaction_index) + "."
+
+                report = {
+                    self.ugettext('Question'): sco_data.get(current_interaction_prefix + "description"),
+                    self.ugettext('Answer'): sco_data.get(current_interaction_prefix + "learner_response"),
+                    self.ugettext('Submissions count'): interactions_count
+                }
+                yield report
 
     def _get_value_from_sco(self, sco, key, default):
         """
