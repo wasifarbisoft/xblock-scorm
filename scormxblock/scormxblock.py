@@ -8,6 +8,7 @@ import logging
 import encodings
 import mimetypes
 import re
+import pytz
 
 from django.conf import settings
 from django.core.files.storage import default_storage
@@ -15,13 +16,15 @@ from django.core.files.storage import get_storage_class
 from django.core.cache import cache
 from django.http import QueryDict
 from webob import Response
+from datetime import datetime
 
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Integer, Boolean, Float
+from xblock.fields import Scope, String, Integer, Boolean, Float, DateTime
 from xblock.fragment import Fragment
 
 from openedx.core.lib.xblock_utils import add_staff_markup
 from microsite_configuration import microsite
+from util.date_utils import get_default_time_display
 
 from mako.template import Template as MakoTemplate
 
@@ -142,7 +145,16 @@ class ScormXBlock(XBlock):
         help=_("JSON object string with overrides to be passed to selected SCORM player.  These will be exposed as data attributes on the host iframe and sent in a window.postMessage to the iframe's content window. Attributes can be any.  'Internal player' will always check this field for an 'initial_html' attribute to override index.html as the initial page."),
         scope=Scope.settings
     )
-
+    scorm_file_name = String(
+        display_name =_("Scorm File Name"),
+        help=_("Scorm Package Uploaded File Name"),
+        default="",
+        scope=Scope.settings
+    )
+    file_uploaded_date = DateTime(
+        default=None, scope=Scope.settings,
+        help="Scorm File Last Uploaded Date"
+    )
     @property
     def student_id(self):
         if hasattr(self, "scope_ids"):
@@ -273,7 +285,8 @@ class ScormXBlock(XBlock):
     def studio_view(self, context=None):
         html = self.resource_string("static/html/studio.html")
         frag = Fragment()
-        context = {'block': self}
+        file_uploaded_date = get_default_time_display(self.file_uploaded_date) if self.file_uploaded_date else ''
+        context = {'block': self, 'file_uploaded_date':file_uploaded_date}
         frag.add_content(MakoTemplate(text=html).render_unicode(**context))
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
         frag.add_javascript(self.resource_string("static/js/src/studio.js"))
@@ -333,6 +346,9 @@ class ScormXBlock(XBlock):
         self.popup_launch_type = request.params['popup_launch_type']
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
+        if request.params['new_scorm_file_uploaded'] == 'true':
+            self.scorm_file_name = request.params['scorm_file_name']
+            self.file_uploaded_date = datetime.utcnow().replace(tzinfo=pytz.utc)
 
         if request.params['player_configuration']:
             try:

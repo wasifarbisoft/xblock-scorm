@@ -1,5 +1,5 @@
 function ScormStudioXBlock(runtime, element) {
-
+  var new_scorm_file_uploaded = false;
   var handlerUrl = runtime.handlerUrl(element, 'studio_submit');
   var fileUploadUrl = runtime.handlerUrl(element, 'file_upload_handler');
   var pollingParams = {id: null, interval: 5000, url: runtime.handlerUrl(element, 'upload_status')};
@@ -24,6 +24,7 @@ function ScormStudioXBlock(runtime, element) {
         clearInterval(pollingParams.id);
         $(element).find('.status-container .success-msg').text('Scorm package has been succesfully uploaded!');
          $(element).find('.save-button').removeClass('disabled');
+          new_scorm_file_uploaded = true;
       }else{
         pollingParams.id = setTimeout(pollUploadStatus, pollingParams.interval);
       }
@@ -44,10 +45,11 @@ function ScormStudioXBlock(runtime, element) {
     add: function(e, data) {
       var file = data.files[0];
 
+      $(element).find('#scorm_file_name').text(file.name);
       $(element).find('#scorm-file-select').hide();
       $(element).find('.file-chosen').text('File Chosen: ' + file.name);
       $(element).find('.status-container').show();
-      $(element).find('.save-button').addClass('disabled')
+      $(element).find('.save-button').addClass('disabled');
 
       data.submit().complete(function(result, textStatus, xhr) {
           if(result.status == 'error'){
@@ -88,6 +90,7 @@ function ScormStudioXBlock(runtime, element) {
     var scorm_player = $(element).find('select[name=scorm_player]').val();
     var encoding = $(element).find('select[name=encoding]').val();
     var player_configuration = $(element).find('textarea[name=player_configuration]').val();
+    var scorm_file_name = $(element).find('#scorm_file_name').text();
     if (!launch_button_text){
       launch_button_text = 'Launch'
     }
@@ -103,6 +106,8 @@ function ScormStudioXBlock(runtime, element) {
     form_data.append('scorm_player', scorm_player);
     form_data.append('encoding', encoding);
     form_data.append('player_configuration', player_configuration);
+    form_data.append('scorm_file_name', scorm_file_name);
+    form_data.append('new_scorm_file_uploaded', new_scorm_file_uploaded);
     runtime.notify('save', {state: 'start'});
 
     $.ajax({

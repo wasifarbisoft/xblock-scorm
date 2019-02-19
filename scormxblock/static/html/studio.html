@@ -4,7 +4,7 @@
       <div class="wrapper-comp-setting">
         <label class="label setting-label" for="display_name">Display Name</label>
         <input class="input setting-input" name="display_name" id="display_name" value="${block.display_name}" type="text" />
-        <div class="setting-help" style="display:block">${block.fields['display_name'].help}</div>        
+        <div class="setting-help" style="display:block">${block.fields['display_name'].help}</div>
       </div>
     </li>
     <li class="field comp-setting-entry is-set">
@@ -49,6 +49,20 @@
           %endfor
         </select>
         <div class="setting-help" style="display:block">${block.fields['scorm_player'].help}</div>        
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="display_name">Scorm File Uploaded Date</label>
+        <span>${file_uploaded_date}</span>
+        <div class="setting-help" style="display:block">${block.fields['file_uploaded_date'].help}</div>
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
+        <label class="label setting-label" for="scorm_file_name">Scorm File Name</label>
+        <span id="scorm_file_name">${block.scorm_file_name}</span>
+        <div class="setting-help" style="display:block">${block.fields['scorm_file_name'].help}</div>
       </div>
     </li>
     <li class="field comp-setting-entry is-set">
