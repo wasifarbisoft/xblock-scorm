@@ -424,9 +424,7 @@ class ScormXBlock(XBlock):
         """
         # TODO: handle errors
         # TODO: this is specific to SSLA player at this point.  evaluate for broader use case
-        response = Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
-        self.mark_in_progress(response.body)
-        return response
+        return Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
 
     @XBlock.handler
     def set_raw_scorm_status(self, request, suffix=''):
@@ -587,15 +585,6 @@ class ScormXBlock(XBlock):
                 self._publish_progress(progress_measure)
         elif current_scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
             self._publish_progress(1.0)
-
-    def mark_in_progress(self, scorm_response_body):
-        """
-        Mark 1% progress upon launching the scorm content for the first time
-        This also marks the module as 'in-progress'
-        Scorm response is empty when user launches course first time
-        """
-        if scorm_response_body == '{}':
-            self._publish_progress(0.01)
 
     def _publish_progress(self, completion):
         """
