@@ -11,18 +11,13 @@ for item in list({player_config}.items()):
     player_config_attrs += 'data-{{}}="{{}}" '.format(item[0], cgi.escape(item[1], quote=True))
 %>
 
-<%
-should_show_description = ('{self.description}' != '') or ({show_popup_manually})
-%>
-
 <div class="scormxblock_block">
     <h3 class="scorm_name">{self.display_name} <span class="scorm_weight"></span></h3>
-    % if should_show_description:
-        <div class="scorm_description">{self.description}
-            % if {show_popup_manually}:
-                <div class="scorm_launch"><button id="scorm-launch-{self.url_name}">{self.launch_button_text}</button></div>
-            % endif
-        </div>
+    % if '{self.description}' != '':
+        <div class="scorm_description">{self.description}</div>
+    % endif
+    % if {show_popup_manually}:
+        <div class="scorm_launch"><button id="scorm-launch-{self.url_name}">{self.launch_button_text}</button></div>
     % endif
 </div>
 
