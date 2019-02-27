@@ -85,9 +85,11 @@ function ScormXBlock_${block_id}(runtime, element) {
     host_frame_${block_id}.data('csrftoken', $.cookie('csrftoken'));
     if (host_frame_${block_id}.data('display_type') == 'iframe') {
       host_frame_${block_id}.css('height', host_frame_${block_id}.data('display_height') + 'px');
+      $('.scorm_launch button').css('display', 'none');
       showScormContent(host_frame_${block_id})
     }
     else if ((host_frame_${block_id}.data('display_type') == 'popup') && (host_frame_${block_id}.data('popup_launch_type') == 'auto')){
+      $('.scorm_launch button').css('display', 'none');
       showScormContent(host_frame_${block_id})
     }
     else{
@@ -100,6 +102,11 @@ function ScormXBlock_${block_id}(runtime, element) {
         launch_btn_${block_id}.removeAttr('disabled');
       })
     }
+
+    document.handleScormPopupClosed = function() {
+      launch_btn = $('.scorm_launch button');
+      launch_btn.removeAttr('disabled');
+    }
   });
 
   function showScormContent(host_frame) {
@@ -109,5 +116,5 @@ function ScormXBlock_${block_id}(runtime, element) {
       playerWin = host_frame[0].contentWindow;
       playerWin.postMessage(host_frame.data(), '*');
     });
-}
+  }
 }
