@@ -16,9 +16,7 @@ for item in list({player_config}.items()):
     % if '{self.description}' != '':
         <div class="scorm_description">{self.description}</div>
     % endif
-    % if {show_popup_manually}:
-        <div class="scorm_launch"><button id="scorm-launch-{self.url_name}">{self.launch_button_text}</button></div>
-    % endif
+    <div class="scorm_launch"><button id="scorm-launch-{self.url_name}">{self.launch_button_text}</button></div>
 </div>
 
 <iframe class="scormxblock_hostframe" id="scormxblock-{self.url_name}" src="" data-block_id="{self.url_name}"
