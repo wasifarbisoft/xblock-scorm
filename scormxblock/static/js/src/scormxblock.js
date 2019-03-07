@@ -124,14 +124,21 @@ function ScormXBlock_${block_id}(runtime, element) {
       }
       return false;
     }
+
+    function showScormContent(host_frame) {
+      if (isAutoPopup()) {
+        var launch_btn = $('.scorm_launch button');
+        launch_btn.attr('disabled','true');
+        launch_btn.css('display', 'inline-block');
+      }
+      playerWin = null;
+      host_frame.attr('src',host_frame.data('player_url'));
+      $(host_frame).on('load', function() {
+        playerWin = host_frame[0].contentWindow;
+        playerWin.postMessage(host_frame.data(), '*');
+      });
+    }
   });
 
-  function showScormContent(host_frame) {
-    playerWin = null;
-    host_frame.attr('src',host_frame.data('player_url'));
-    $(host_frame).on('load', function() {
-      playerWin = host_frame[0].contentWindow;
-      playerWin.postMessage(host_frame.data(), '*');
-    });
-  }
+
 }
