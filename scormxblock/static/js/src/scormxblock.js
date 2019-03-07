@@ -88,7 +88,7 @@ function ScormXBlock_${block_id}(runtime, element) {
       $('.scorm_launch button').css('display', 'none');
       showScormContent(host_frame_${block_id})
     }
-    else if ((host_frame_${block_id}.data('display_type') == 'popup') && (host_frame_${block_id}.data('popup_launch_type') == 'auto')){
+    else if (isAutoPopup()){
       $('.scorm_launch button').css('display', 'none');
       showScormContent(host_frame_${block_id})
     }
@@ -106,6 +106,23 @@ function ScormXBlock_${block_id}(runtime, element) {
     document.handleScormPopupClosed = function() {
       launch_btn = $('.scorm_launch button');
       launch_btn.removeAttr('disabled');
+      // Changing src to empty exits the ssla player. Done for
+      // saving user data and smooth second launch.
+      host_frame_${block_id}.attr('src','');
+      if (isAutoPopup()){
+        launch_btn.css('display', 'inline-block');
+        launch_btn.on('click', function() {
+            showScormContent(host_frame_${block_id})
+            launch_btn.attr('disabled','true')
+        });
+      }
+    }
+
+    function isAutoPopup(){
+      if ((host_frame_${block_id}.data('display_type') == 'popup') && (host_frame_${block_id}.data('popup_launch_type') == 'auto')){
+        return true;
+      }
+      return false;
     }
   });
 
