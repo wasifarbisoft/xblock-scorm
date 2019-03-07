@@ -100,6 +100,13 @@ class ScormXBlock(XBlock):
         help=_('SCORM block\'s problem weight in the course, in points.  If not graded, set to 0'),
         scope=Scope.settings
     )
+    auto_completion = Boolean(
+        display_name=_("Auto Completion on First Load"),
+        help=_("Should Xblock be marked as 100% completed on first load"),
+        default=False,
+        scope=Scope.content,
+        enforce_type=True
+    )
     display_type = String(
         display_name =_("Display Type"),
         values=["iframe", "popup"],
@@ -346,6 +353,7 @@ class ScormXBlock(XBlock):
         self.popup_launch_type = request.params['popup_launch_type']
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
+        self.auto_completion = request.params['auto_completion']
         if request.params['new_scorm_file_uploaded'] == 'true':
             self.scorm_file_name = request.params['scorm_file_name']
             self.file_uploaded_date = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -424,7 +432,17 @@ class ScormXBlock(XBlock):
         """
         # TODO: handle errors
         # TODO: this is specific to SSLA player at this point.  evaluate for broader use case
-        return Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
+        response = Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
+        self.update_progress(response.body)
+        return response
+
+    def update_progress(self, scorm_response_body):
+        """
+        Mark 100% progress upon launching the scorm content for the first time if auto_completion is true
+        Scorm response is empty when user launches course first time
+        """
+        if self.auto_completion and scorm_response_body == '{}':
+            self._publish_progress(1)
 
     @XBlock.handler
     def set_raw_scorm_status(self, request, suffix=''):
