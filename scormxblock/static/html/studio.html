@@ -67,20 +67,17 @@
     </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
+        <input class="input setting-input" name="auto-completion" type="checkbox"
+          {% if self.auto_completion %}checked="checked"{% endif %} style="width:auto;height:auto;min-width:auto;">
+        <label class="label setting-label" for="auto_completion" style="width:auto;">${block.fields['auto_completion'].display_name}</label>
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
         <label class="label setting-label" for="weight">Weight</label>
         <input class="input setting-input" name="weight" id="weight" value="${block.weight}" type="number" />
       </div>
       <div class="setting-help" style="display:block">${block.fields['weight'].help}</div>        
-    </li>
-    <li class="field comp-setting-entry is-set">
-      <div class="wrapper-comp-setting">
-        <label class="label setting-label" for="auto_completion">Auto Completion</label>
-        <div>
-          <input class="input setting-input" name="auto-completion" type="checkbox"
-              {% if self.auto_completion %}checked="checked"{% endif %} style="width:auto;height:auto">
-        </div>
-        <div class="setting-help" style="display:block">${block.fields['auto_completion'].help}</div>
-      </div>
     </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">

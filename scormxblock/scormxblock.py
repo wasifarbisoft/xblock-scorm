@@ -101,8 +101,7 @@ class ScormXBlock(XBlock):
         scope=Scope.settings
     )
     auto_completion = Boolean(
-        display_name=_("Auto Completion on First Load"),
-        help=_("If checked Xblock will be marked as 100% completed on first load"),
+        display_name=_("Enable completion upon viewing SCORM file"),
         default=False,
         scope=Scope.settings
     )
