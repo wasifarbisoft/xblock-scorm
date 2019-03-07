@@ -89,7 +89,7 @@ function ScormStudioXBlock(runtime, element) {
     var launch_button_text = $(element).find('input[name=launch_button_text]').val();
     var scorm_player = $(element).find('select[name=scorm_player]').val();
     var encoding = $(element).find('select[name=encoding]').val();
-    var auto_completion = $(element).find('select[name=auto_completion]').val();
+    var auto_completion = $(element).find('input[name=auto_completion]').is(':checked');
     var player_configuration = $(element).find('textarea[name=player_configuration]').val();
     var scorm_file_name = $(element).find('#scorm_file_name').text();
     if (!launch_button_text){

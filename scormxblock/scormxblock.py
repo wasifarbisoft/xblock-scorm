@@ -102,10 +102,9 @@ class ScormXBlock(XBlock):
     )
     auto_completion = Boolean(
         display_name=_("Auto Completion on First Load"),
-        help=_("Should Xblock be marked as 100% completed on first load"),
+        help=_("If checked Xblock will be marked as 100% completed on first load"),
         default=False,
-        scope=Scope.content,
-        enforce_type=True
+        scope=Scope.settings
     )
     display_type = String(
         display_name =_("Display Type"),
@@ -433,15 +432,16 @@ class ScormXBlock(XBlock):
         # TODO: handle errors
         # TODO: this is specific to SSLA player at this point.  evaluate for broader use case
         response = Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
-        self.update_progress(response.body)
+        if self.auto_completion:
+            self._mark_xblock_completed_on_first_load(response.body)
         return response
 
-    def update_progress(self, scorm_response_body):
+    def _mark_xblock_completed_on_first_load(self, scorm_response_body):
         """
         Mark 100% progress upon launching the scorm content for the first time if auto_completion is true
         Scorm response is empty when user launches course first time
         """
-        if self.auto_completion and scorm_response_body == '{}':
+        if scorm_response_body == '{}':
             self._publish_progress(1)
 
     @XBlock.handler

@@ -75,11 +75,10 @@
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
         <label class="label setting-label" for="auto_completion">Auto Completion</label>
-        <select class="input setting-input" name="auto_completion" id="auto_completion">
-          %for opt in block.fields['auto_completion'].values:
-            <option value="${opt['value']}" ${block.auto_completion == opt['value'] and 'selected'}>${opt['display_name']}</option>
-          %endfor
-        </select>
+        <div>
+          <input class="input setting-input" name="auto-completion" type="checkbox"
+              {% if self.auto_completion %}checked="checked"{% endif %} style="width:auto;height:auto">
+        </div>
         <div class="setting-help" style="display:block">${block.fields['auto_completion'].help}</div>
       </div>
     </li>
