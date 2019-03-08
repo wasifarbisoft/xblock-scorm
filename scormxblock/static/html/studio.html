@@ -67,6 +67,13 @@
     </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
+        <input class="input setting-input" name="auto_completion" type="checkbox"
+          ${block.auto_completion == True and 'checked '} style="width:auto;height:auto;min-width:auto;">
+        <label class="label setting-label" for="auto_completion" style="width:auto;">${block.fields['auto_completion'].display_name}</label>
+      </div>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
         <label class="label setting-label" for="weight">Weight</label>
         <input class="input setting-input" name="weight" id="weight" value="${block.weight}" type="number" />
       </div>
