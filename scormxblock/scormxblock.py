@@ -432,16 +432,10 @@ class ScormXBlock(XBlock):
         # TODO: this is specific to SSLA player at this point.  evaluate for broader use case
         response = Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
         if self.auto_completion:
-            self._mark_xblock_completed_on_first_load(response.body)
-        return response
+            # Mark 100% progress upon launching the scorm content if auto_completion is true
+            self._publish_progress(1.0)
 
-    def _mark_xblock_completed_on_first_load(self, scorm_response_body):
-        """
-        Mark 100% progress upon launching the scorm content for the first time if auto_completion is true
-        Scorm response is empty when user launches course first time
-        """
-        if scorm_response_body == '{}':
-            self._publish_progress(1)
+        return response
 
     @XBlock.handler
     def set_raw_scorm_status(self, request, suffix=''):
