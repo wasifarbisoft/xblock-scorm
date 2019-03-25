@@ -131,20 +131,20 @@ function ScormStudioXBlock(runtime, element) {
     runtime.notify('cancel', {});
   });
 
-  //when Display Type is changed trigger the showHidePopupLaunchOptions function.
+  // When Display Type is changed trigger the showHidePopupLaunchOptions function.
   $(element).find('input[name=display_type]').bind('click', function() {
     showHidePopupLaunchOptions()
   });
 
-  //when Popup Launch Type is changed trigger the showHideLaunchButtonTextField function.
+  // When Popup Launch Type is changed trigger the showHideLaunchButtonTextField function.
   $(element).find('input[name=popup_launch_type]').bind('click', function() {
     var display_type_popup = true;
     showHideLaunchButtonTextField(display_type_popup)
 
   });
 
-  //when Display Type is popup show popup types and when it is iframe hide popup types
-  //also trigger the showHideLaunchButtonTextField function.
+  // When Display Type is popup show popup types and when it is iframe hide popup types
+  // also trigger the showHideLaunchButtonTextField function.
   function showHidePopupLaunchOptions() {
       var display_type = $(element).find('input[name=display_type]:checked').val();
       var display_type_popup = false;
@@ -159,8 +159,8 @@ function ScormStudioXBlock(runtime, element) {
       }
   }
 
-  //when display type is popup and popup type is manual show launch button text field,
-  //in other cases hide show launch button text field
+  // When display type is popup and popup type is manual show launch button text field,
+  // in other cases hide show launch button text field
   function showHideLaunchButtonTextField(display_type_popup) {
     if(display_type_popup === true){
       $(element).find('#launch_button').show();
@@ -171,6 +171,7 @@ function ScormStudioXBlock(runtime, element) {
     }
   }
 
+  // Changes label text for launch button field
   function modifyLaunchButtonTextField() {
     var popup_launch_type = $(element).find('input[name=popup_launch_type]:checked').val();
     if (popup_launch_type === 'manual') {
