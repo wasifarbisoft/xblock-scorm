@@ -162,13 +162,25 @@ function ScormStudioXBlock(runtime, element) {
   //when display type is popup and popup type is manual show launch button text field,
   //in other cases hide show launch button text field
   function showHideLaunchButtonTextField(display_type_popup) {
-        var popup_launch_type = $(element).find('input[name=popup_launch_type]:checked').val();
-        if(display_type_popup === true && popup_launch_type === 'manual'){
-          $(element).find('#launch_button').show();
-        }
-        else{
-          $(element).find('#launch_button').hide();
-        }
+    if(display_type_popup === true){
+      $(element).find('#launch_button').show();
+      modifyLaunchButtonTextField();
+    }
+    else{
+      $(element).find('#launch_button').hide();
+    }
+  }
+
+  function modifyLaunchButtonTextField() {
+    var popup_launch_type = $(element).find('input[name=popup_launch_type]:checked').val();
+    if (popup_launch_type === 'manual') {
+      $(element).find('#launch_button .label').text('Launch Button Text');
+      $(element).find('#launch_button .setting-help').text('Display text for Launch Button');
+    }
+    else if (popup_launch_type === 'auto') {
+      $(element).find('#launch_button .label').text('Relaunch Button Text');
+      $(element).find('#launch_button .setting-help').text('Display text for Relaunch Button');
+    }
   }
 
   $(function ($) {
