@@ -1,19 +1,13 @@
 import json
 import os
 import pkg_resources
-import zipfile
-import shutil
-import tempfile
 import logging
 import encodings
 import mimetypes
-import re
 import pytz
 
 from django.conf import settings
 from django.core.files.storage import default_storage
-from django.core.files.storage import get_storage_class
-from django.core.cache import cache
 from django.http import QueryDict
 from webob import Response
 from datetime import datetime
@@ -29,7 +23,7 @@ from util.date_utils import get_default_time_display
 from mako.template import Template as MakoTemplate
 
 from .scorm_file_uploader import ScormPackageUploader, STATE as UPLOAD_STATE
-from . import constants
+import constants
 
 # Make '_' a no-op so we can scrape strings
 _ = lambda text: text
@@ -37,7 +31,7 @@ _ = lambda text: text
 logger = logging.getLogger(__name__)
 
 # importing directly from settings.XBLOCK_SETTINGS doesn't work here... doesn't have vals from ENV TOKENS yet
-scorm_settings = settings.ENV_TOKENS['XBLOCK_SETTINGS']['ScormXBlock']
+scorm_settings = settings.ENV_TOKENS['XBLOCK_SETTINGS']['ScormXBlock'] if hasattr(settings, 'ENV_TOKENS') else {}
 DEFINED_PLAYERS = scorm_settings.get("SCORM_PLAYER_BACKENDS", {})
 SCORM_STORAGE = scorm_settings.get("SCORM_PKG_STORAGE_DIR", "scorms")
 SCORM_DISPLAY_STAFF_DEBUG_INFO = scorm_settings.get("SCORM_DISPLAY_STAFF_DEBUG_INFO", False)
