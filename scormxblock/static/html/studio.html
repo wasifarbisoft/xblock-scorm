@@ -81,6 +81,14 @@
     </li>
     <li class="field comp-setting-entry is-set">
       <div class="wrapper-comp-setting">
+        <input class="input setting-input" name="is_next_module_locked" type="checkbox"
+          ${block.is_next_module_locked == True and 'checked '} style="width:auto;height:auto;min-width:auto;">
+        <label class="label setting-label" >${block.fields['is_next_module_locked'].display_name}</label>
+      </div>
+      <label class="label setting-label" style="width:auto;">${block.fields['is_next_module_locked'].help}</label>
+    </li>
+    <li class="field comp-setting-entry is-set">
+      <div class="wrapper-comp-setting">
         <fieldset>
           <legend class="label setting-label">Display Type</legend>
           %for opt in block.fields['display_type'].values:

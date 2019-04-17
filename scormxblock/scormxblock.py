@@ -89,6 +89,10 @@ class ScormXBlock(XBlock):
         scope=Scope.user_state,
         default=0
     )
+    scorm_progress = Float(
+        scope=Scope.user_state,
+        default=0
+    )
     weight = Integer(
         default=1,
         help=_('SCORM block\'s problem weight in the course, in points.  If not graded, set to 0'),
@@ -98,6 +102,12 @@ class ScormXBlock(XBlock):
         display_name=_("Enable completion upon viewing SCORM file"),
         default=False,
         scope=Scope.settings
+    )
+    is_next_module_locked = Boolean(
+        display_name=_("Locking"),
+        help=_('Enable requirement to complete SCORM content before moving to next module'),
+        default=False,
+        scope=Scope.settings,
     )
     display_type = String(
         display_name =_("Display Type"),
@@ -235,6 +245,7 @@ class ScormXBlock(XBlock):
         iframe_width = self.display_type=='popup' and DEFAULT_IFRAME_WIDTH or self.display_width;
         iframe_height = self.display_type=='popup' and DEFAULT_IFRAME_HEIGHT or self.display_height;
         show_popup_manually = True if self.display_type=='popup' and self.popup_launch_type=='manual' else False;
+        lock_next_module = self.is_next_module_locked and self.scorm_progress < constants.MAX_PROGRESS_VALUE
         try:
             player_config = json.loads(self.player_configuration)
         except ValueError:
@@ -246,7 +257,8 @@ class ScormXBlock(XBlock):
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
                                                        player_config=player_config,
                                                        show_popup_manually=show_popup_manually,
-                                                       scorm_file=course_directory)
+                                                       scorm_file=course_directory,
+                                                       is_next_module_locked=lock_next_module)
                                      ).render_unicode())
 
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
@@ -346,6 +358,7 @@ class ScormXBlock(XBlock):
         self.scorm_player = request.params['scorm_player']
         self.encoding = request.params['encoding']
         self.auto_completion = request.params['auto_completion']
+        self.is_next_module_locked = request.params['is_next_module_locked']
         if request.params['new_scorm_file_uploaded'] == 'true':
             self.scorm_file_name = request.params['scorm_file_name']
             self.file_uploaded_date = datetime.utcnow().replace(tzinfo=pytz.utc)
@@ -427,7 +440,7 @@ class ScormXBlock(XBlock):
         response = Response(self.raw_scorm_status, content_type='application/json', charset='UTF-8')
         if self.auto_completion:
             # Mark 100% progress upon launching the scorm content if auto_completion is true
-            self._publish_progress(1.0)
+            self._publish_progress(constants.MAX_PROGRESS_VALUE)
 
         return response
 
@@ -589,12 +602,13 @@ class ScormXBlock(XBlock):
             if self.is_progress_measure_valid(progress_measure, old_scorm_data):
                 self._publish_progress(progress_measure)
         elif current_scorm_data.get('status', '') in constants.SCORM_COMPLETION_STATUS:
-            self._publish_progress(1.0)
+            self._publish_progress(constants.MAX_PROGRESS_VALUE)
 
     def _publish_progress(self, completion):
         """
         Update completion by calling the completion API
         """
+        self.scorm_progress = completion
         self.runtime.publish(self, 'completion', {'completion': completion})
 
     def calculate_progress_measure(self, scorm_data):

@@ -1,1 +1,2 @@
 SCORM_COMPLETION_STATUS = ['completed', 'passed']
+MAX_PROGRESS_VALUE = 1.0

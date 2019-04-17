@@ -90,6 +90,7 @@ function ScormStudioXBlock(runtime, element) {
     var scorm_player = $(element).find('select[name=scorm_player]').val();
     var encoding = $(element).find('select[name=encoding]').val();
     var auto_completion = $(element).find('input[name=auto_completion]').is(':checked');
+    var is_next_module_locked = $(element).find('input[name=is_next_module_locked]').is(':checked');
     var player_configuration = $(element).find('textarea[name=player_configuration]').val();
     var scorm_file_name = $(element).find('#scorm_file_name').text();
     if (!launch_button_text){
@@ -107,6 +108,7 @@ function ScormStudioXBlock(runtime, element) {
     form_data.append('scorm_player', scorm_player);
     form_data.append('encoding', encoding);
     form_data.append('auto_completion', auto_completion);
+    form_data.append('is_next_module_locked', is_next_module_locked);
     form_data.append('player_configuration', player_configuration);
     form_data.append('scorm_file_name', scorm_file_name);
     form_data.append('new_scorm_file_uploaded', new_scorm_file_uploaded);
