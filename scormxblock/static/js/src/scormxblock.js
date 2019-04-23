@@ -107,6 +107,28 @@ function ScormXBlock_${block_id}(runtime, element) {
       // This function resides in apros, since most of the functionality is related to apros
       disableNextModuleArrow();
     }
+
+    $('#scorm-check-completion-${block_id}').on('click', function(){
+      host_frame_${block_id}.attr('src', '')
+      host_frame_${block_id}.attr('src', host_frame_${block_id}.data('player_url'))
+      reEvaluateCompletion();
+    })
+
+    function reEvaluateCompletion()
+    {
+      window.setTimeout(function(){
+      $.ajax({
+        type: 'POST',
+        url: host_frame_${block_id}.data('get_completion'),
+        content_type: 'application/json'
+      }).done(function(data, status, xhr){
+        if (xhr.status == 200) {
+          console.log(data.get('completion', 0))
+        }
+        })
+      }, 2 * 1000)
+    }
+
     document.handleScormPopupClosed = function() {
       launch_btn = $('.scorm_launch button');
       launch_btn.removeAttr('disabled');
