@@ -104,6 +104,7 @@ function ScormXBlock_${block_id}(runtime, element) {
     }
 
     if (host_frame_${block_id}.data('is_next_module_locked') == "True") {
+      // This function resides in apros, since most of the functionality is related to apros
       disableNextModuleArrow();
     }
     document.handleScormPopupClosed = function() {
@@ -126,50 +127,6 @@ function ScormXBlock_${block_id}(runtime, element) {
         return true;
       }
       return false;
-    }
-
-    function disableNextModuleArrow() {
-      if (isNewUI()) {
-        disableNextModuleArrowForNewUI();
-      }
-      else {
-        disableNextModuleArrowForOldUI();
-      }
-    }
-
-    function isNewUI() {
-      return $("body").hasClass("new-theme");
-    }
-
-    function disableNextModuleArrowForOldUI() {
-      var nextModuleLink = $(".controls .next");
-      if (isNextLinkAlreadyDisabled(nextModuleLink)) return;
-      nextModuleLink.addClass("complete-scorm future");
-      nextModuleLink.attr("href", "javascript:void()");
-
-      var completionPopup = document.createElement('div');
-      completionPopup.className = "complete-scorm-content";
-      completionPopup.innerHTML = '<i class="fa fa-lock"></i>Complete all content to unlock';
-
-      $(".controls .next .mcka-tooltip").prepend(completionPopup);
-    }
-
-    function disableNextModuleArrowForNewUI() {
-      var nextModuleLink = $(".controls .right");
-      if (isNextLinkAlreadyDisabled(nextModuleLink)) return;
-
-      nextModuleLink.addClass("disable");
-      nextModuleLink.attr("href", "javascript:void()");
-      var completionPopupContent = '<i class=material-icons locked>lock</i><b>Complete all content to unlock<br></b>';
-      var popupContent = $(".controls .right span").attr("data-content");
-
-      $(".controls .right span").attr("data-content", completionPopupContent + popupContent);
-    }
-
-    function isNextLinkAlreadyDisabled(nextModuleLink) {
-      var nextLinkValue = nextModuleLink.attr("href");
-      // No need to do anything since next link is already disabled
-      return nextLinkValue == "#" || nextLinkValue == "javascript:void()";
     }
 
     function showScormContent(host_frame) {
