@@ -29,5 +29,8 @@ data-csrftoken=""
 ${{player_config_attrs}}
 ></iframe>
 
-<div class="scorm_completion"><button id="scorm-check-completion-{self.url_name}">Check Completion</button></div>
-<p id="scorm-completion-feedback-{self.url_name}"></p>
+<div class="scormxblock_block" id="scorm-gating-{self.url_name}" hidden>
+<div class="scorm_completion"><button id="scorm-check-completion-{self.url_name}"></button></div>
+<br>
+<p id="scorm-completion-feedback-{self.url_name}" class="scorm_description" style="font-weight:bold;"></p>
+</div>
