@@ -78,8 +78,8 @@ function ScormXBlock_${block_id}(runtime, element) {
   $(function ($) {
     API = new SCORM_API();
     console.log("Initial SCORM data...");
-    const completedFeedbackText = gettext('Content is Complete, Please Continue')
-    const incompleteFeedbackText = gettext('Complete All Content to Continue')
+    const completedFeedbackText = gettext('Content is complete, please continue.')
+    const incompleteFeedbackText = gettext('Complete all content to continue.')
     const completionButtonTitle = gettext('Check for Completion')
 
     //post message with data to player frame
