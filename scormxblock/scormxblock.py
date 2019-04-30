@@ -236,11 +236,11 @@ class ScormXBlock(XBlock):
         if not authoring:
             get_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_raw_scorm_status"))
             set_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "set_raw_scorm_status"))
-            get_completion = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_scorm_completion"))
+            get_completion_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_scorm_completion"))
         # PreviewModuleSystem (runtime Mixin from Studio) won't have a hostname
         else:
             # we don't want to get/set SCORM status from preview
-            get_url = set_url = get_completion = '#'
+            get_url = set_url = get_completion_url = '#'
 
         # if display type is popup, don't use the full window width for the host iframe
         iframe_width = self.display_type=='popup' and DEFAULT_IFRAME_WIDTH or self.display_width;
@@ -255,7 +255,7 @@ class ScormXBlock(XBlock):
         frag = Fragment()
         frag.add_content(MakoTemplate(text=html.format(self=self, scorm_player_url=scorm_player_url,
                                                        get_url=get_url, set_url=set_url,
-                                                       get_completion = get_completion,
+                                                       get_completion_url = get_completion_url,
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
                                                        player_config=player_config,
                                                        show_popup_manually=show_popup_manually,

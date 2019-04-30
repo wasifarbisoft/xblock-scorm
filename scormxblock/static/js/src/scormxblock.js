@@ -78,9 +78,9 @@ function ScormXBlock_${block_id}(runtime, element) {
   $(function ($) {
     API = new SCORM_API();
     console.log("Initial SCORM data...");
-    const completedFeedbackText = gettext('Content is complete, please continue.')
-    const incompleteFeedbackText = gettext('Complete all content to continue.')
-    const completionButtonTitle = gettext('Check for Completion')
+    const completedFeedbackText = gettext('Content is complete, please continue.');
+    const incompleteFeedbackText = gettext('Complete all content to continue.');
+    const completionButtonTitle = gettext('Check for Completion');
 
     //post message with data to player frame
     //player must be in an iframe and not a popup due to limitations in Internet Explorer's postMessage implementation
@@ -92,19 +92,19 @@ function ScormXBlock_${block_id}(runtime, element) {
       host_frame_${block_id}.css('height', host_frame_${block_id}.data('display_height') + 'px');
       $('.scorm_launch button').css('display', 'none');
       showCompletionIfGatingEnabled();
-      showScormContent(host_frame_${block_id})
+      showScormContent(host_frame_${block_id});
     }
     else if (isAutoPopup()){
       // Auto popup
       $('.scorm_launch button').css('display', 'none');
-      showScormContent(host_frame_${block_id})
+      showScormContent(host_frame_${block_id});
     }
     else{
       // Manual popup
       launch_btn_${block_id} = $('#scorm-launch-${block_id}');
       launch_btn_${block_id}.on('click', function() {
-        showScormContent(host_frame_${block_id})
-        launch_btn_${block_id}.attr('disabled','true')
+        showScormContent(host_frame_${block_id});
+        launch_btn_${block_id}.attr('disabled','true');
       });
       $(host_frame_${block_id}).on('unload', function() {
         launch_btn_${block_id}.removeAttr('disabled');
@@ -114,8 +114,8 @@ function ScormXBlock_${block_id}(runtime, element) {
     function showCompletionIfGatingEnabled() {
       let isGatingEnabled = $('#scormxblock-${block_id}').attr('data-is_next_module_locked');
       if (isGatingEnabled === 'True') {
-        $('#scorm-gating-${block_id}').removeAttr('hidden')
-        $('#scorm-check-completion-${block_id}').text(completionButtonTitle)
+        $('#scorm-gating-${block_id}').removeAttr('hidden');
+        $('#scorm-check-completion-${block_id}').text(completionButtonTitle);
       }
     }
 
@@ -127,9 +127,9 @@ function ScormXBlock_${block_id}(runtime, element) {
     $('#scorm-check-completion-${block_id}').on('click', function(){
       // Empty feedback text
       // Update completion on backend by triggering the set_raw_scorm_status call
-      $('#scorm-completion-feedback-${block_id}').text('')
-      host_frame_${block_id}.attr('src', '')
-      host_frame_${block_id}.attr('src', host_frame_${block_id}.data('player_url'))
+      $('#scorm-completion-feedback-${block_id}').text('');
+      host_frame_${block_id}.attr('src', '');
+      host_frame_${block_id}.attr('src', host_frame_${block_id}.data('player_url'));
       evaluateCompletion();
     })
 
@@ -139,7 +139,7 @@ function ScormXBlock_${block_id}(runtime, element) {
       window.setTimeout(function(){
         $.ajax({
           type: 'POST',
-          url: host_frame_${block_id}.data('get_completion'),
+          url: host_frame_${block_id}.data('get_completion_url'),
           content_type: 'application/json'
         }).done(function(data, status, xhr){
           if (xhr.status == 200) {
@@ -165,23 +165,23 @@ function ScormXBlock_${block_id}(runtime, element) {
     }
 
     function setFeedbackText(feedbackText) {
-      $('#scorm-completion-feedback-${block_id}').text(feedbackText)
+      $('#scorm-completion-feedback-${block_id}').text(feedbackText);
     }
 
     function unsetGatingFlagInIframe() {
-      host_frame_${block_id}.data('is_next_module_locked', "False")
-      host_frame_${block_id}.attr('data-is_next_module_locked', "False")
+      host_frame_${block_id}.data('is_next_module_locked', "False");
+      host_frame_${block_id}.attr('data-is_next_module_locked', "False");
     }
 
     function shouldEnableRightArrowButton() {
       let allScormIframesInPage = $('.scormxblock_hostframe')
       for (i=0; i<allScormIframesInPage.length; i=i+1) {
-        let scorm_id = allScormIframesInPage[i].id
+        let scorm_id = allScormIframesInPage[i].id;
         if ($('#' + scorm_id).attr('data-is_next_module_locked') === 'True') {
-          return false
+          return false;
         }
       }
-      return true
+      return true;
     }
 
     document.handleScormPopupClosed = function() {
@@ -193,8 +193,8 @@ function ScormXBlock_${block_id}(runtime, element) {
       if (isAutoPopup()){
         launch_btn.css('display', 'inline-block');
         launch_btn.on('click', function() {
-            showScormContent(host_frame_${block_id})
-            launch_btn.attr('disabled','true')
+            showScormContent(host_frame_${block_id});
+            launch_btn.attr('disabled','true');
         });
       }
     }
