@@ -174,6 +174,8 @@ function ScormXBlock_${block_id}(runtime, element) {
     }
 
     function shouldEnableRightArrowButton() {
+      // Check if other scorm iframes in the same page have gating applied
+      // and are not yet complete
       let allScormIframesInPage = $('.scormxblock_hostframe')
       for (i=0; i<allScormIframesInPage.length; i=i+1) {
         let scorm_id = allScormIframesInPage[i].id;
@@ -187,8 +189,9 @@ function ScormXBlock_${block_id}(runtime, element) {
     document.handleScormPopupClosed = function() {
       launch_btn = $('.scorm_launch button');
       launch_btn.removeAttr('disabled');
-      // Changing src to empty exits the ssla player. Done for
-      // saving user data and smooth second launch.
+
+      // Changing src to empty exits the ssla player. This is done for
+      // saving user data.
       host_frame_${block_id}.attr('src','');
       if (isAutoPopup()){
         launch_btn.css('display', 'inline-block');
@@ -196,6 +199,11 @@ function ScormXBlock_${block_id}(runtime, element) {
             showScormContent(host_frame_${block_id});
             launch_btn.attr('disabled','true');
         });
+      }
+
+      if (host_frame_${block_id}.data('is_next_module_locked') == "True") {
+      // If gating is applied
+        evaluateCompletion();
       }
     }
 
