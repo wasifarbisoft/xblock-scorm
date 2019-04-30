@@ -21,10 +21,16 @@ for item in list({player_config}.items()):
 <iframe class="scormxblock_hostframe" id="scormxblock-{self.url_name}" src="" data-block_id="{self.url_name}"
 data-player_url="{scorm_player_url}" data-display_type="{self.display_type}" data-display_width="{self.display_width}"
 data-display_height="{self.display_height}" data-popup_launch_type="{self.popup_launch_type}"
-data-get_url="{get_url}" data-set_url="{set_url}"
+data-get_url="{get_url}" data-set_url="{set_url}" data-get_completion_url="{get_completion_url}"
 data-course_location="{scorm_file}/" data-course_id="{self.course_id}"
 data-student_name="{self.student_name}" data-student_id="{self.student_id}"
 data-is_next_module_locked="{is_next_module_locked}"
 data-csrftoken=""
 ${{player_config_attrs}}
 ></iframe>
+
+<div class="scormxblock_block" id="scorm-gating-{self.url_name}" hidden>
+<div class="scorm_completion"><button id="scorm-check-completion-{self.url_name}"></button></div>
+<br>
+<p id="scorm-completion-feedback-{self.url_name}" class="scorm_description" style="font-weight:bold;"></p>
+</div>
