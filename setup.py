@@ -22,7 +22,7 @@ def package_data(pkg, roots):
 
 setup(
     name='scormxblock-xblock',
-    version='2.0.28',
+    version='2.0.29',
     description='XBlock to integrate SCORM content packages',
     packages=[
         'scormxblock',
