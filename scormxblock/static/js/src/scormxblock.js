@@ -121,7 +121,13 @@ function ScormXBlock_${block_id}(runtime, element) {
 
     if (host_frame_${block_id}.data('is_next_module_locked') == "True") {
       // This function resides in apros, since most of the functionality is related to apros
-      disableNextModuleArrow();
+      try{
+        disableNextModuleArrow();
+      }
+      catch(error){
+        console.log('disableNextModuleArrow() not defined');
+      }
+
     }
 
     $('#scorm-check-completion-${block_id}').on('click', function(){
@@ -154,9 +160,15 @@ function ScormXBlock_${block_id}(runtime, element) {
       if (completion === 1) {
         setFeedbackText(completedFeedbackText);
         unsetGatingFlagInIframe();
-        if (shouldEnableRightArrowButton) {
+        if (shouldEnableRightArrowButton()) {
           // Function on Apros side course_lesson.js
-          enableNextModuleArrow();
+          try{
+            enableNextModuleArrow();
+          }
+          catch(error){
+            console.log('enableNextModuleArrow() not defined');
+          }
+
         }
       }
       else {
