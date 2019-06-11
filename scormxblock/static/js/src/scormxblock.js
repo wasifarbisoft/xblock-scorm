@@ -242,7 +242,7 @@ function ScormXBlock_${block_id}(runtime, element) {
     }
 
     function disablePopupIfMobile() {
-      var isMobile = (/android|webos|iphone|ipad|ipod|blackberry|com.mcka.RNApp|iemobile|opera mini/i.test(navigator.userAgent.toLowerCase()));
+      var isMobile = (/com.mcka.RNApp/i.test(navigator.userAgent.toLowerCase()));
       if (isMobile) {
         host_frame_${block_id}.data('display_type', 'iframe')
         host_frame_${block_id}.attr('data-display_type', 'iframe')
