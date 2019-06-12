@@ -87,7 +87,12 @@ function ScormXBlock_${block_id}(runtime, element) {
     host_frame_${block_id} = $('#scormxblock-${block_id}');
     host_frame_${block_id}.data('csrftoken', $.cookie('csrftoken'));
 
-    disablePopupIfMobile()
+    let isRNApp = (/com.mcka.RNApp/i.test(navigator.userAgent.toLowerCase()));
+    if (isRNApp) {
+      host_frame_${block_id}.data('display_type', 'iframe')
+      host_frame_${block_id}.attr('data-display_type', 'iframe')
+    }
+
     if (host_frame_${block_id}.data('display_type') == 'iframe') {
       // Iframe
       host_frame_${block_id}.css('height', host_frame_${block_id}.data('display_height') + 'px');
@@ -239,14 +244,6 @@ function ScormXBlock_${block_id}(runtime, element) {
         playerWin = host_frame[0].contentWindow;
         playerWin.postMessage(host_frame.data(), '*');
       });
-    }
-
-    function disablePopupIfMobile() {
-      var isRNApp = (/com.mcka.RNApp/i.test(navigator.userAgent.toLowerCase()));
-      if (isRNApp) {
-        host_frame_${block_id}.data('display_type', 'iframe')
-        host_frame_${block_id}.attr('data-display_type', 'iframe')
-      }
     }
   });
 }
