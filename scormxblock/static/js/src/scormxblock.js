@@ -242,8 +242,8 @@ function ScormXBlock_${block_id}(runtime, element) {
     }
 
     function disablePopupIfMobile() {
-      var isMobile = (/com.mcka.RNApp/i.test(navigator.userAgent.toLowerCase()));
-      if (isMobile) {
+      var isRNApp = (/com.mcka.RNApp/i.test(navigator.userAgent.toLowerCase()));
+      if (isRNApp) {
         host_frame_${block_id}.data('display_type', 'iframe')
         host_frame_${block_id}.attr('data-display_type', 'iframe')
       }
