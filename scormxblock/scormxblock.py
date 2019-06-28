@@ -8,6 +8,7 @@ import pytz
 
 from django.conf import settings
 from django.core.files.storage import default_storage
+from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import QueryDict
 from webob import Response
 from datetime import datetime
@@ -205,6 +206,19 @@ class ScormXBlock(XBlock):
         data = pkg_resources.resource_string(__name__, path)
         return data.decode("utf8")
 
+    def resource_url(self, block_type, uri):
+        try:
+            return reverse('xblock_resource_url', kwargs={
+                'block_type': block_type,
+                'uri': uri,
+            })
+        except NoReverseMatch:
+            return self.local_resource_url(self, uri)
+
+    def local_resource_url(self, block, uri):
+        # TODO move to xblock-utils
+        return self.runtime.local_resource_url(block, uri)
+
     def student_view(self, context=None, authoring=False):
         scheme = 'https' if settings.HTTPS == 'on' else 'http'
         lms_base = settings.ENV_TOKENS.get('LMS_BASE')
@@ -226,7 +240,7 @@ class ScormXBlock(XBlock):
             if '://' in player:
                 scorm_player_url = player
             else:
-                scorm_player_url = '{}://{}{}'.format(scheme, lms_base, player)
+                scorm_player_url = self.resource_url(self.scope_ids.block_type, "public/ssla/player.htm")
             course_directory = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "proxy_content"))
 
         html = self.resource_string("static/html/scormxblock.html")
