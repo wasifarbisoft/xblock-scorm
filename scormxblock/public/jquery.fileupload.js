@@ -14,12 +14,7 @@
 
 ;(function (factory) {
     'use strict';
-    if (typeof define === 'function' && define.amd) {
-        // Register as an anonymous AMD module:
-        define([
-            'jquery'
-        ], factory);
-    } else if (typeof exports === 'object') {
+    if (typeof exports === 'object') {
         // Node/CommonJS:
         factory(
             require('jquery'),
