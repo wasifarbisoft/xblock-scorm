@@ -494,7 +494,7 @@ class ScormXBlock(XBlock):
             if ext in mimetypes.types_map:
                 content_type = mimetypes.types_map[ext]
         else:
-            return Response('Did not exist in storage: ' + path_to_file + '\nstorage.path=' + storage.path(''), status=404, content_type='text/html', charset='UTF-8')
+            return Response('Did not exist in storage: ' + path_to_file , status=404, content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
     def generate_report_data(self, user_state_iterator, limit_responses=None):
