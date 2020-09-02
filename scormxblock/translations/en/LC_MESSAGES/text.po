@@ -1,0 +1,158 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-01 05:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: scormxblock.py:53
+msgid "Display Name"
+msgstr ""
+
+#: scormxblock.py:54
+msgid "Display name for this module"
+msgstr ""
+
+#: scormxblock.py:59
+msgid "Description"
+msgstr ""
+
+#: scormxblock.py:60
+msgid ""
+"Brief description of the SCORM modules will be displayed above the player. "
+"Can contain HTML."
+msgstr ""
+
+#: scormxblock.py:65
+msgid "Upload scorm file (.zip)"
+msgstr ""
+
+#: scormxblock.py:66
+msgid "Upload a new SCORM package."
+msgstr ""
+
+#: scormxblock.py:71
+msgid "SCORM player"
+msgstr ""
+
+#: scormxblock.py:72
+msgid ""
+"SCORM player configured in Django settings, or index.html file contained in "
+"SCORM package"
+msgstr ""
+
+#: scormxblock.py:98
+msgid ""
+"SCORM block's problem weight in the course, in points.  If not graded, set "
+"to 0"
+msgstr ""
+
+#: scormxblock.py:102
+msgid "Enable completion upon viewing SCORM file"
+msgstr ""
+
+#: scormxblock.py:107
+msgid "Locking"
+msgstr ""
+
+#: scormxblock.py:108
+msgid ""
+"Enable requirement to complete SCORM content before moving to next module"
+msgstr ""
+
+#: scormxblock.py:113
+msgid "Display Type"
+msgstr ""
+
+#: scormxblock.py:116
+msgid ""
+"Open in a new popup window, or an iframe.  This setting may be overridden by "
+"player-specific configuration."
+msgstr ""
+
+#: scormxblock.py:120
+msgid "Popup Launch Type"
+msgstr ""
+
+#: scormxblock.py:123
+msgid "Open in a new popup through button or automatically."
+msgstr ""
+
+#: scormxblock.py:127
+msgid "Launch Button Text"
+msgstr ""
+
+#: scormxblock.py:128
+msgid "Display text for Launch Button"
+msgstr ""
+
+#: scormxblock.py:133
+msgid "Display Width (px)"
+msgstr ""
+
+#: scormxblock.py:134
+msgid "Width of iframe or popup window"
+msgstr ""
+
+#: scormxblock.py:139
+msgid "Display Height (px)"
+msgstr ""
+
+#: scormxblock.py:140
+msgid "Height of iframe or popup window"
+msgstr ""
+
+#: scormxblock.py:145
+msgid "SCORM Package text encoding"
+msgstr ""
+
+#: scormxblock.py:147
+msgid ""
+"Character set used in SCORM package.  Defaults to cp850 (or IBM850), for "
+"Latin-1: Western European languages)"
+msgstr ""
+
+#: scormxblock.py:152
+msgid "Player Configuration"
+msgstr ""
+
+#: scormxblock.py:154
+msgid ""
+"JSON object string with overrides to be passed to selected SCORM player.  "
+"These will be exposed as data attributes on the host iframe and sent in a "
+"window.postMessage to the iframe's content window. Attributes can be any.  "
+"'Internal player' will always check this field for an 'initial_html' "
+"attribute to override index.html as the initial page."
+msgstr ""
+
+#: scormxblock.py:158
+msgid "Scorm File Name"
+msgstr ""
+
+#: scormxblock.py:159
+msgid "Scorm Package Uploaded File Name"
+msgstr ""
+
+#: scormxblock.py:541
+msgid "Question"
+msgstr ""
+
+#: scormxblock.py:542
+msgid "Answer"
+msgstr ""
+
+#: scormxblock.py:543
+msgid "Submissions count"
+msgstr ""
