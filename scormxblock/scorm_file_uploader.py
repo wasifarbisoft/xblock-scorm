@@ -1,17 +1,16 @@
 from __future__ import absolute_import
-import os
-import tempfile
-import re
-import zipfile
-import shutil
+
 import logging
+import os
+import re
+import shutil
+import tempfile
+import zipfile
 
 from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.files.storage import get_storage_class
-from django.utils import encoding
 from django.core.cache import cache
-
+from django.core.files.storage import default_storage, get_storage_class
+from django.utils import encoding
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +22,13 @@ CONTENT_RE = re.compile(r"(?P<start>\d{1,11})-(?P<end>\d{1,11})/(?P<size>\d{1,11
 PROGRESS_CACHE_EXPIRY = 1 * 60 * 60  # 1 Hour
 
 
-class FileAccessMode(object):
+class FileAccessMode:
     WRITE = "wb+"
     APPEND = "ab+"
     READ_WRITE = "rb+"
 
 
-class STATE(object):
+class STATE:
     """
     enum for upload state
     """
@@ -37,7 +36,7 @@ class STATE(object):
     COMPLETE = 'complete'
 
 
-class ScormPackageUploader(object):
+class ScormPackageUploader:
     """
     Handles scorm package uploading
     """
@@ -145,7 +144,7 @@ class ScormPackageUploader(object):
                 try:
                     for key in storage.bucket.list(prefix=self.scorm_storage_location):
                         key.delete()
-                except AttributeError:
+                except AttributeError:  # pylint: disable=try-except-raise
                     raise
 
     def _files_to_store(self, tempdir):

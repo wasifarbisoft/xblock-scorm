@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+
 import encodings
 import json
 import logging
@@ -27,8 +28,11 @@ from . import constants
 from .scorm_file_uploader import STATE as UPLOAD_STATE
 from .scorm_file_uploader import ScormPackageUploader
 
+
 # Make '_' a no-op so we can scrape strings
-_ = lambda text: text
+def _(text):
+    return text
+
 
 logger = logging.getLogger(__name__)
 
@@ -69,7 +73,8 @@ class ScormXBlock(XBlock):
         scope=Scope.settings
     )
     scorm_player = String(
-        values=[{"value": key, "display_name": DEFINED_PLAYERS[key]['name']} for key in DEFINED_PLAYERS.keys()] + [SCORM_PKG_INTERNAL, ],
+        values=[{"value": key, "display_name": DEFINED_PLAYERS[key]['name']} for key in DEFINED_PLAYERS.keys()] +
+               [SCORM_PKG_INTERNAL, ],
         display_name=_("SCORM player"),
         help=_("SCORM player configured in Django settings, or index.html file contained in SCORM package"),
         scope=Scope.settings
@@ -115,7 +120,8 @@ class ScormXBlock(XBlock):
         display_name=_("Display Type"),
         values=["iframe", "popup"],
         default="iframe",
-        help=_("Open in a new popup window, or an iframe.  This setting may be overridden by player-specific configuration."),
+        help=_("Open in a new popup window, or an iframe.  This setting may be overridden by "
+               "player-specific configuration."),
         scope=Scope.settings
     )
     popup_launch_type = String(
@@ -146,14 +152,19 @@ class ScormXBlock(XBlock):
     encoding = String(
         display_name=_("SCORM Package text encoding"),
         default='cp850',
-        help=_("Character set used in SCORM package.  Defaults to cp850 (or IBM850), for Latin-1: Western European languages)"),
+        help=_("Character set used in SCORM package.  Defaults to cp850 (or IBM850), "
+               "for Latin-1: Western European languages)"),
         values=[{"value": AVAIL_ENCODINGS[key], "display_name": key} for key in sorted(AVAIL_ENCODINGS.keys())],
         scope=Scope.settings
     )
     player_configuration = String(
         display_name=_("Player Configuration"),
         default='',
-        help=_("JSON object string with overrides to be passed to selected SCORM player.  These will be exposed as data attributes on the host iframe and sent in a window.postMessage to the iframe's content window. Attributes can be any.  'Internal player' will always check this field for an 'initial_html' attribute to override index.html as the initial page."),
+        help=_("JSON object string with overrides to be passed to selected SCORM player.  "
+               "These will be exposed as data attributes on the host iframe and sent in a window.postMessage "
+               "to the iframe's content window. Attributes can be any.  "
+               "'Internal player' will always check this field for an 'initial_html' attribute "
+               "to override index.html as the initial page."),
         scope=Scope.settings
     )
     scorm_file_name = String(
@@ -239,7 +250,8 @@ class ScormXBlock(XBlock):
         if not authoring:
             get_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_raw_scorm_status"))
             set_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "set_raw_scorm_status"))
-            get_completion_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_scorm_completion"))
+            get_completion_url = '{}://{}{}'.format(scheme, lms_base,
+                                                    self.runtime.handler_url(self, "get_scorm_completion"))
         # PreviewModuleSystem (runtime Mixin from Studio) won't have a hostname
         else:
             # we don't want to get/set SCORM status from preview
@@ -248,7 +260,7 @@ class ScormXBlock(XBlock):
         # if display type is popup, don't use the full window width for the host iframe
         iframe_width = self.display_type == 'popup' and DEFAULT_IFRAME_WIDTH or self.display_width
         iframe_height = self.display_type == 'popup' and DEFAULT_IFRAME_HEIGHT or self.display_height
-        show_popup_manually = True if self.display_type == 'popup' and self.popup_launch_type == 'manual' else False
+        show_popup_manually = self.display_type == 'popup' and self.popup_launch_type == 'manual'
         lock_next_module = self.is_next_module_locked and self.scorm_progress < constants.MAX_PROGRESS_VALUE
         try:
             player_config = json.loads(self.player_configuration)
@@ -289,7 +301,8 @@ class ScormXBlock(XBlock):
                 disable_staff_debug_info = settings.FEATURES.get('DISPLAY_DEBUG_INFO_TO_STAFF', True) and False or True
                 block = self
                 view = 'student_view'
-                frag = add_staff_markup(dj_user, has_instructor_access, disable_staff_debug_info, block, view, frag, context)
+                frag = add_staff_markup(dj_user, has_instructor_access, disable_staff_debug_info,
+                                        block, view, frag, context)
 
         frag.initialize_js('ScormXBlock_{0}'.format(context['block_id']))
         return frag
@@ -372,7 +385,9 @@ class ScormXBlock(XBlock):
                 json.loads(request.params['player_configuration'])  # just validation
                 self.player_configuration = request.params['player_configuration']
             except ValueError as e:
-                return Response(json.dumps({'result': 'failure', 'error': 'Invalid JSON in Player Configuration'.format(e)}), content_type='application/json')
+                return Response(json.dumps({'result': 'failure',
+                                            'error': 'Invalid JSON in Player Configuration'.format(e)}),
+                                content_type='application/json')
 
         return Response(json.dumps({'result': 'success'}), content_type='application/json')
 
@@ -496,7 +511,8 @@ class ScormXBlock(XBlock):
             if ext in mimetypes.types_map:
                 content_type = mimetypes.types_map[ext]
         else:
-            return Response('Did not exist in storage: ' + path_to_file, status=404, content_type='text/html', charset='UTF-8')
+            return Response('Did not exist in storage: ' + path_to_file, status=404,
+                            content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
     def generate_report_data(self, user_state_iterator, limit_responses=None):
