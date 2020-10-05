@@ -40,3 +40,6 @@ quality: ## run quality checkers on the codebase
 	pycodestyle scormxblock --max-line-length=120
 	pylint scormxblock
 
+requirements: ## install development environment requirements
+	pip install -r requirements.txt --exists-action w
+	pip install -r requirements-dev.txt --exists-action w
