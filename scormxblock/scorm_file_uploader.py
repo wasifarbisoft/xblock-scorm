@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import os
 import tempfile
 import re
@@ -117,7 +118,7 @@ class ScormPackageUploader(object):
                     logger.info('File `{}` stored.'.format(file_relative_path))
                     uploaded_size += file_to_store['size']
                     self._set_upload_progress(uploaded_size, total_files_size)
-                except encoding.DjangoUnicodeDecodeError, e:
+                except encoding.DjangoUnicodeDecodeError as e:
                     logger.warn('SCORM XBlock Couldn\'t store file {} to storage. {}'.format(file_to_store, e))
 
         self._post_upload_cleanup(tempdir)
@@ -151,7 +152,7 @@ class ScormPackageUploader(object):
         files_to_store = []
         total_files_size = 0
 
-        for (dirpath, dirnames, files) in os.walk(tempdir):
+        for (dirpath, _, files) in os.walk(tempdir):
             for f in files:
                 file_path = os.path.join(os.path.abspath(dirpath), f)
                 size = os.path.getsize(file_path)

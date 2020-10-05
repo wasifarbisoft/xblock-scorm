@@ -1,6 +1,9 @@
 """Setup for scormxblock XBlock."""
 
+from __future__ import absolute_import
+
 import os
+
 from setuptools import setup
 
 
@@ -22,7 +25,7 @@ def package_data(pkg, roots):
 
 setup(
     name='scormxblock-xblock',
-    version='2.3',
+    version='3.0',
     description='XBlock to integrate SCORM content packages',
     packages=[
         'scormxblock',
