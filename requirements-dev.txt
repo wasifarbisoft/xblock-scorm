@@ -1,0 +1,9 @@
+XBlock>=1.2
+
+edx-opaque-keys>=0.4
+Django~=1.11; python_version == '2.7'
+Django~=2.2; python_version > '2.7'
+-e git://github.com/edx/xblock-utils.git#egg=xblock-utils
+
+pylint
+pycodestyle==2.4.0

@@ -1,0 +1,4 @@
+
+-e git://github.com/edx/xblock-utils.git#egg=xblock-utils
+-e .
+

@@ -35,3 +35,11 @@ dummy_translations: ## generate dummy translation (.po) files
 build_dummy_translations: dummy_translations compile_translations ## generate and compile dummy translation files
 
 validate_translations: build_dummy_translations detect_changed_source_translations ## validate translations
+
+quality: ## run quality checkers on the codebase
+	pycodestyle scormxblock --max-line-length=120
+	pylint scormxblock
+
+requirements: ## install development environment requirements
+	pip install -r requirements.txt --exists-action w
+	pip install -r requirements-dev.txt --exists-action w

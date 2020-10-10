@@ -1,16 +1,16 @@
-import os
-import tempfile
-import re
-import zipfile
-import shutil
+from __future__ import absolute_import
+
 import logging
+import os
+import re
+import shutil
+import tempfile
+import zipfile
 
 from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.files.storage import get_storage_class
-from django.utils import encoding
 from django.core.cache import cache
-
+from django.core.files.storage import default_storage, get_storage_class
+from django.utils import encoding
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +22,13 @@ CONTENT_RE = re.compile(r"(?P<start>\d{1,11})-(?P<end>\d{1,11})/(?P<size>\d{1,11
 PROGRESS_CACHE_EXPIRY = 1 * 60 * 60  # 1 Hour
 
 
-class FileAccessMode(object):
+class FileAccessMode:
     WRITE = "wb+"
     APPEND = "ab+"
     READ_WRITE = "rb+"
 
 
-class STATE(object):
+class STATE:
     """
     enum for upload state
     """
@@ -36,7 +36,7 @@ class STATE(object):
     COMPLETE = 'complete'
 
 
-class ScormPackageUploader(object):
+class ScormPackageUploader:
     """
     Handles scorm package uploading
     """
@@ -117,7 +117,7 @@ class ScormPackageUploader(object):
                     logger.info('File `{}` stored.'.format(file_relative_path))
                     uploaded_size += file_to_store['size']
                     self._set_upload_progress(uploaded_size, total_files_size)
-                except encoding.DjangoUnicodeDecodeError, e:
+                except encoding.DjangoUnicodeDecodeError as e:
                     logger.warn('SCORM XBlock Couldn\'t store file {} to storage. {}'.format(file_to_store, e))
 
         self._post_upload_cleanup(tempdir)
@@ -144,14 +144,14 @@ class ScormPackageUploader(object):
                 try:
                     for key in storage.bucket.list(prefix=self.scorm_storage_location):
                         key.delete()
-                except AttributeError:
+                except AttributeError:  # pylint: disable=try-except-raise
                     raise
 
     def _files_to_store(self, tempdir):
         files_to_store = []
         total_files_size = 0
 
-        for (dirpath, dirnames, files) in os.walk(tempdir):
+        for (dirpath, _, files) in os.walk(tempdir):
             for f in files:
                 file_path = os.path.join(os.path.abspath(dirpath), f)
                 size = os.path.getsize(file_path)

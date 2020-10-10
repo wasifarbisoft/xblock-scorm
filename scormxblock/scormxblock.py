@@ -1,32 +1,38 @@
-import json
-import os
-import pkg_resources
-import logging
-import encodings
-import mimetypes
-import pytz
+from __future__ import absolute_import
 
+import encodings
+import json
+import logging
+import mimetypes
+import os
+from datetime import datetime
+
+import pkg_resources
+import pytz
+import six
 from django.conf import settings
 from django.core.files.storage import default_storage
 from django.http import QueryDict
+from mako.template import Template as MakoTemplate
+from six.moves import range
 from webob import Response
-from datetime import datetime
-
 from xblock.core import XBlock
-from xblock.fields import Scope, String, Integer, Boolean, Float, DateTime
+from xblock.fields import Boolean, DateTime, Float, Integer, Scope, String
 from xblock.fragment import Fragment
 
-from openedx.core.lib.xblock_utils import add_staff_markup
 from microsite_configuration import microsite
+from openedx.core.lib.xblock_utils import add_staff_markup
 from util.date_utils import get_default_time_display
 
-from mako.template import Template as MakoTemplate
+from . import constants
+from .scorm_file_uploader import STATE as UPLOAD_STATE
+from .scorm_file_uploader import ScormPackageUploader
 
-from .scorm_file_uploader import ScormPackageUploader, STATE as UPLOAD_STATE
-import constants
 
 # Make '_' a no-op so we can scrape strings
-_ = lambda text: text
+def _(text):
+    return text
+
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +73,8 @@ class ScormXBlock(XBlock):
         scope=Scope.settings
     )
     scorm_player = String(
-        values=[{"value": key, "display_name": DEFINED_PLAYERS[key]['name']} for key in DEFINED_PLAYERS.keys()] + [SCORM_PKG_INTERNAL, ],
+        values=[{"value": key, "display_name": DEFINED_PLAYERS[key]['name']} for key in DEFINED_PLAYERS.keys()] +
+               [SCORM_PKG_INTERNAL, ],
         display_name=_("SCORM player"),
         help=_("SCORM player configured in Django settings, or index.html file contained in SCORM package"),
         scope=Scope.settings
@@ -110,33 +117,34 @@ class ScormXBlock(XBlock):
         scope=Scope.settings,
     )
     display_type = String(
-        display_name =_("Display Type"),
+        display_name=_("Display Type"),
         values=["iframe", "popup"],
         default="iframe",
-        help=_("Open in a new popup window, or an iframe.  This setting may be overridden by player-specific configuration."),
+        help=_("Open in a new popup window, or an iframe.  This setting may be overridden by "
+               "player-specific configuration."),
         scope=Scope.settings
     )
     popup_launch_type = String(
-        display_name =_("Popup Launch Type"),
+        display_name=_("Popup Launch Type"),
         values=["auto", "manual"],
         default="auto",
         help=_("Open in a new popup through button or automatically."),
         scope=Scope.settings
     )
     launch_button_text = String(
-        display_name =_("Launch Button Text"),
+        display_name=_("Launch Button Text"),
         help=_("Display text for Launch Button"),
         default="Launch",
         scope=Scope.settings
     )
     display_width = Integer(
-        display_name =_("Display Width (px)"),
+        display_name=_("Display Width (px)"),
         help=_('Width of iframe or popup window'),
         default=820,
         scope=Scope.settings
     )
     display_height = Integer(
-        display_name =_("Display Height (px)"),
+        display_name=_("Display Height (px)"),
         help=_('Height of iframe or popup window'),
         default=450,
         scope=Scope.settings
@@ -144,18 +152,23 @@ class ScormXBlock(XBlock):
     encoding = String(
         display_name=_("SCORM Package text encoding"),
         default='cp850',
-        help=_("Character set used in SCORM package.  Defaults to cp850 (or IBM850), for Latin-1: Western European languages)"),
+        help=_("Character set used in SCORM package.  Defaults to cp850 (or IBM850), "
+               "for Latin-1: Western European languages)"),
         values=[{"value": AVAIL_ENCODINGS[key], "display_name": key} for key in sorted(AVAIL_ENCODINGS.keys())],
         scope=Scope.settings
     )
     player_configuration = String(
-        display_name =_("Player Configuration"),
+        display_name=_("Player Configuration"),
         default='',
-        help=_("JSON object string with overrides to be passed to selected SCORM player.  These will be exposed as data attributes on the host iframe and sent in a window.postMessage to the iframe's content window. Attributes can be any.  'Internal player' will always check this field for an 'initial_html' attribute to override index.html as the initial page."),
+        help=_("JSON object string with overrides to be passed to selected SCORM player.  "
+               "These will be exposed as data attributes on the host iframe and sent in a window.postMessage "
+               "to the iframe's content window. Attributes can be any.  "
+               "'Internal player' will always check this field for an 'initial_html' attribute "
+               "to override index.html as the initial page."),
         scope=Scope.settings
     )
     scorm_file_name = String(
-        display_name =_("Scorm File Name"),
+        display_name=_("Scorm File Name"),
         help=_("Scorm Package Uploaded File Name"),
         default="",
         scope=Scope.settings
@@ -164,6 +177,7 @@ class ScormXBlock(XBlock):
         default=None, scope=Scope.settings,
         help="Scorm File Last Uploaded Date"
     )
+
     @property
     def student_id(self):
         if hasattr(self, "scope_ids"):
@@ -198,7 +212,7 @@ class ScormXBlock(XBlock):
         if hasattr(key, 'to_deprecated_string'):
             return key.to_deprecated_string()
         else:
-            return unicode(key)
+            return six.text_type(key)
 
     def resource_string(self, path):
         """Handy helper for getting resources from our kit."""
@@ -236,16 +250,17 @@ class ScormXBlock(XBlock):
         if not authoring:
             get_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_raw_scorm_status"))
             set_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "set_raw_scorm_status"))
-            get_completion_url = '{}://{}{}'.format(scheme, lms_base, self.runtime.handler_url(self, "get_scorm_completion"))
+            get_completion_url = '{}://{}{}'.format(scheme, lms_base,
+                                                    self.runtime.handler_url(self, "get_scorm_completion"))
         # PreviewModuleSystem (runtime Mixin from Studio) won't have a hostname
         else:
             # we don't want to get/set SCORM status from preview
             get_url = set_url = get_completion_url = '#'
 
         # if display type is popup, don't use the full window width for the host iframe
-        iframe_width = self.display_type=='popup' and DEFAULT_IFRAME_WIDTH or self.display_width;
-        iframe_height = self.display_type=='popup' and DEFAULT_IFRAME_HEIGHT or self.display_height;
-        show_popup_manually = True if self.display_type=='popup' and self.popup_launch_type=='manual' else False;
+        iframe_width = self.display_type == 'popup' and DEFAULT_IFRAME_WIDTH or self.display_width
+        iframe_height = self.display_type == 'popup' and DEFAULT_IFRAME_HEIGHT or self.display_height
+        show_popup_manually = self.display_type == 'popup' and self.popup_launch_type == 'manual'
         lock_next_module = self.is_next_module_locked and self.scorm_progress < constants.MAX_PROGRESS_VALUE
         try:
             player_config = json.loads(self.player_configuration)
@@ -255,20 +270,19 @@ class ScormXBlock(XBlock):
         frag = Fragment()
         frag.add_content(MakoTemplate(text=html.format(self=self, scorm_player_url=scorm_player_url,
                                                        get_url=get_url, set_url=set_url,
-                                                       get_completion_url = get_completion_url,
+                                                       get_completion_url=get_completion_url,
                                                        iframe_width=iframe_width, iframe_height=iframe_height,
                                                        player_config=player_config,
                                                        show_popup_manually=show_popup_manually,
                                                        scorm_file=course_directory,
                                                        is_next_module_locked=lock_next_module)
-                                     ).render_unicode())
+                                      ).render_unicode())
 
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
         context['block_id'] = self.url_name
         js = self.resource_string("static/js/src/scormxblock.js")
         jsfrag = MakoTemplate(js).render_unicode(**context)
         frag.add_javascript(jsfrag)
-
 
         # TODO: this will only work to display staff debug info if 'scormxblock' is one of the
         # categories of blocks that are specified in lms/templates/staff_problem_info.html so this will
@@ -287,7 +301,8 @@ class ScormXBlock(XBlock):
                 disable_staff_debug_info = settings.FEATURES.get('DISPLAY_DEBUG_INFO_TO_STAFF', True) and False or True
                 block = self
                 view = 'student_view'
-                frag = add_staff_markup(dj_user, has_instructor_access, disable_staff_debug_info, block, view, frag, context)
+                frag = add_staff_markup(dj_user, has_instructor_access, disable_staff_debug_info,
+                                        block, view, frag, context)
 
         frag.initialize_js('ScormXBlock_{0}'.format(context['block_id']))
         return frag
@@ -299,7 +314,7 @@ class ScormXBlock(XBlock):
         html = self.resource_string("static/html/studio.html")
         frag = Fragment()
         file_uploaded_date = get_default_time_display(self.file_uploaded_date) if self.file_uploaded_date else ''
-        context = {'block': self, 'file_uploaded_date':file_uploaded_date}
+        context = {'block': self, 'file_uploaded_date': file_uploaded_date}
         frag.add_content(MakoTemplate(text=html).render_unicode(**context))
         frag.add_css(self.resource_string("static/css/scormxblock.css"))
         frag.add_javascript(self.resource_string("static/js/src/studio.js"))
@@ -369,8 +384,10 @@ class ScormXBlock(XBlock):
             try:
                 json.loads(request.params['player_configuration'])  # just validation
                 self.player_configuration = request.params['player_configuration']
-            except ValueError, e:
-                return Response(json.dumps({'result': 'failure', 'error': 'Invalid JSON in Player Configuration'.format(e)}), content_type='application/json')
+            except ValueError as e:
+                return Response(json.dumps({'result': 'failure',
+                                            'error': 'Invalid JSON in Player Configuration'.format(e)}),
+                                content_type='application/json')
 
         return Response(json.dumps({'result': 'success'}), content_type='application/json')
 
@@ -392,7 +409,7 @@ class ScormXBlock(XBlock):
             self._publish_grade()
             context.update({"lesson_score": self.lesson_score})
         if name == 'cmi.core.score.raw':
-            self._set_lesson_score(data.get('value',0))
+            self._set_lesson_score(data.get('value', 0))
         return context
 
     def _get_all_scos(self):
@@ -477,7 +494,7 @@ class ScormXBlock(XBlock):
         completion = {'completion': self.scorm_progress or 0}
         return Response(
             json.dumps(completion),
-            content_type = 'application/json'
+            content_type='application/json'
         )
 
     @XBlock.handler
@@ -494,7 +511,8 @@ class ScormXBlock(XBlock):
             if ext in mimetypes.types_map:
                 content_type = mimetypes.types_map[ext]
         else:
-            return Response('Did not exist in storage: ' + path_to_file , status=404, content_type='text/html', charset='UTF-8')
+            return Response('Did not exist in storage: ' + path_to_file, status=404,
+                            content_type='text/html', charset='UTF-8')
         return Response(contents, content_type=content_type)
 
     def generate_report_data(self, user_state_iterator, limit_responses=None):
@@ -571,10 +589,9 @@ class ScormXBlock(XBlock):
         for sco in scos.keys():
             sco = scos[sco]['data']
             total_score += int(self._get_value_from_sco(sco, 'cmi.core.score.raw', 0))
-        score_rollup = float(total_score) / float(len(scos.keys()))
+        score_rollup = float(total_score) / float(len(list(scos.keys())))
         self.lesson_score = score_rollup
         return score_rollup
-
 
     def _publish_grade(self, status, score):
         """
@@ -597,7 +614,7 @@ class ScormXBlock(XBlock):
                 self,
                 'grade',
                 {
-                    'value': (float(score)/float(DEFAULT_SCO_MAX_SCORE)) * self.weight,
+                    'value': (float(score) / float(DEFAULT_SCO_MAX_SCORE)) * self.weight,
                     'max_value': self.weight,
                 })
 
