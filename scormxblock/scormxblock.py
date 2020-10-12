@@ -20,7 +20,6 @@ from xblock.core import XBlock
 from xblock.fields import Boolean, DateTime, Float, Integer, Scope, String
 from xblock.fragment import Fragment
 
-from microsite_configuration import microsite
 from openedx.core.lib.xblock_utils import add_staff_markup
 from util.date_utils import get_default_time_display
 
@@ -225,9 +224,6 @@ class ScormXBlock(XBlock):
         if isinstance(context, QueryDict):
             context = context.dict()
 
-        if microsite.is_request_in_microsite():
-            subdomain = microsite.get_value("domain_prefix", None) or microsite.get_value('microsite_config_key')
-            lms_base = "{}.{}".format(subdomain, lms_base)
         scorm_player_url = ""
 
         course_directory = self.scorm_file
